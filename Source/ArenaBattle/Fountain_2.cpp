@@ -52,7 +52,7 @@ void AFountain::BeginPlay()
 {
 	Super::BeginPlay();
 
-	ABLOG(Warning, TEXT("Actor Name : %s, ID : %d, Location X : %.3f"), *GetName(), ID, GetActorLocation().X);
+	UE_LOG(ArenaBattle, Warning, TEXT("Axtor Name : %s, ID : %d, Location X : %.3f"), *GetName(), ID, GetActorLocation().X);
 	
 }
 
