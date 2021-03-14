@@ -6,13 +6,13 @@
 // Sets default values
 AFountain::AFountain()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	Body = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BODY"));
 	Water = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WATER"));
 	Light = CreateDefaultSubobject<UPointLightComponent>(TEXT("LIGHT"));
-	Splash = CreateDefaultSubobject<UParticleSystemComponent>)TEXT("SPLASH"));
+	Splash = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("SPLASH"));
 
 	RootComponent = Body;
 	Water->SetupAttachment(Body);
@@ -31,18 +31,20 @@ AFountain::AFountain()
 		Body->SetStaticMesh(SM_BODY.Object);
 	}
 
-	 //교재 93페이지의 무슨 말인지 모르겠는 라인 들어감
+	static ConstructorHelpers::FObjectFinder<UStaticMesh>
+		SM_WATER(TEXT("/Game/InfinityBladeGrassLands/Environments/Plains/Env_Plains_Ruins/StaticMesh/SM_Plains_Castle_Fountain_02.SM_Plains_Castle_Fountain_02"));
 
 	if (SM_WATER.Succeeded())
 	{
 		Water->SetStaticMesh(SM_WATER.Object);
 	}
 
-	//교재 94페이지 무슨말인지 모르겠는 라인 들어감
+	static ConstructorHelpers::FObjectFinder<UParticleSystem>
+		PS_SPLASH(TEXT("/Game/InfinityBladeGrassLands/Effects/FX_Ambient/Water/P_Water_Fountain_Splash_Base_01.P_Water_Fountain_Splash_Base_01"));
 
 	if (PS_SPLASH.Succeeded())
 	{
-		Splash->SetTemplate(PS_SPALSH.Object);
+		Splash->SetTemplate(PS_SPLASH.Object);
 	}
 }
 
@@ -52,8 +54,8 @@ void AFountain::BeginPlay()
 {
 	Super::BeginPlay();
 
-	ABLOG(Warning, TEXT("Actor Name : %s, ID : %d, Location X : %.3f"), *GetName(), ID, GetActorLocation().X);
-	
+	UE_LOG(ArenaBattle, Warning, TEXT("Axtor Name : %s, ID : %d, Location X : %.3f"), *GetName(), ID, GetActorLocation().X);
+
 }
 
 // Called every frame
