@@ -11,10 +11,39 @@ AFountain::AFountain()
 
 	Body = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BODY"));
 	Water = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WATER"));
+	Light = CreateDefaultSubobject<UPointLightComponent>(TEXT("LIGHT"));
+	Splash = CreateDefaultSubobject<UParticleSystemComponent>)TEXT("SPLASH"));
 
 	RootComponent = Body;
 	Water->SetupAttachment(Body);
+	Light->SetupAttachment(Body);
+	Splash->SetupAttachment(Body);
 
+	Water->SetRelativeLocation(FVector(0.0f, 0.0f, 135.0f));
+	Light->SetRelativeLocation(FVector(0.0f, 0.0f, 195.0f));
+	Splash->SetRelativeLocation(FVector(0.0f, 0.0f, 195.0f));
+
+	static ConstructorHelpers::FObjectFinder<UStaticMesh>
+		SM_BODY(TEXT("/Game/InfinityBladeGrassLands/Environments/Plains/Env_Plains_Ruins/StaticMesh/SM_Plains_Castle_Fountain_01.SM_Plains_Castle_Fountain_01"));
+
+	if (SM_BODY.Succeeded())
+	{
+		Body->SetStaticMesh(SM_BODY.Object);
+	}
+
+	 //교재 93페이지의 무슨 말인지 모르겠는 라인 들어감
+
+	if (SM_WATER.Succeeded())
+	{
+		Water->SetStaticMesh(SM_WATER.Object);
+	}
+
+	//교재 94페이지 무슨말인지 모르겠는 라인 들어감
+
+	if (PS_SPLASH.Succeeded())
+	{
+		Splash->SetTemplate(PS_SPALSH.Object);
+	}
 }
 
 
