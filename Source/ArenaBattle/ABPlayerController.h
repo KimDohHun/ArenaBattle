@@ -16,7 +16,7 @@ class ARENABATTLE_API AABPlayerController : public APlayerController
 
 public:
 	virtual void PostInitializeComponents() override;
-	virtual void Possess(APawn* aPawn) override;
+	virtual void OnPossess(APawn* aPawn) override;
 
 protected:
 	//virtual void SetupInoutComponent() override;  이 라인 삭제 후 159페이지 라인 작성?

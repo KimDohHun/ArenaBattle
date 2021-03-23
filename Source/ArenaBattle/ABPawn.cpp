@@ -35,7 +35,7 @@ AABPawn::AABPawn()
 }
 
 // Called when the game starts or when spawned
-void AABPawn::BeginPlay()
+/*void AABPawn::BeginPlay()
 {
 	Super::BeginPlay();
 	Mesh->SetAnimationMode(EAnimationMode::AnimationSingleNode);
@@ -45,7 +45,15 @@ void AABPawn::BeginPlay()
 		Mesh->PlayAnimation(AnimAsset, true);
 	}
 	
-}
+}*/
+
+/*Mesh->SetAnimationMode(EAnimationMode::AnimationBlueprint);
+
+static ConstructorHelpers::FClassFinder<UAnimInstance> WARRIOR_ANIM(TEXT("/Game/Book/Animations/WarriorAnimBlueprint.WarriorAnimBlueprint_c"));
+if (WARRIOR_ANIM.Succeeded())
+{
+	Mesh->SetAnimInstanceClass(WARRIOR_ANIM.Class);
+}*/
 
 // Called every frame
 void AABPawn::Tick(float DeltaTime)
