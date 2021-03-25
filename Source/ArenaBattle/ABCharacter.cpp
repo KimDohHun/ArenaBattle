@@ -27,7 +27,7 @@ AABCharacter::AABCharacter()
     GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
 
     static ConstructorHelpers::FClassFinder<UAnimInstance> WARRIOR_ANiM(TEXT("/Game/Book/Animations/WarriorAnimBlueprint.WarriorAnimBlueprint_C"));
-    if (WARRIOR_ANIM.Succeeded())
+    if (WARRIOR_ANIM.Succeeded())  //선언되지 않은 식별자라는데 잘 모르겠습니다. 뒤에 블루프린트 관련 에러들도 모두 여기서 비롯되는 듯합니다.
     {
         GetMesh()->SetAnimInstanceClass(WARRIOR_ANIM.Class);
     }
@@ -37,6 +37,7 @@ AABCharacter::AABCharacter()
 
     ArmLengthSpeed = 3.0f;
     ArmRotationSpeed = 10.0f;
+    GetCharacterMovement()->JumpZVelocity = 800.0f;
 }
 
 // Called when the game starts or when spawned
@@ -135,6 +136,7 @@ void AABCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
     PlayerInputComponent->BindAction(TEXT("ViewChange"), EInputEvent::IE_Pressed, this, &AABCharacter::ViewChange);
+    PlayerInputComponent->BindAction(TEXT("JUMP"), EInputEvent::IE_Pressed, this, &AABCharacter::JUMP);  //블루프린트에서 점프 에러를 해결하지 않고 작성해서 빨간줄이 생기는 듯합니다. 
 
     PlayerInputComponent->BindAxis(TEXT("UpDown"), this, &AABCharacter::UpDown);
     PlayerInputComponent->BindAxis(TEXT("LeftRight"), this, &AABCharacter::LeftRight);
