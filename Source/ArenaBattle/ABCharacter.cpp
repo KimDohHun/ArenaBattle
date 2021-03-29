@@ -2,6 +2,7 @@
 
 
 #include "ABCharacter.h"
+#include "ABAnimInstance.h"
 
 // Sets default values
 AABCharacter::AABCharacter()
@@ -38,6 +39,17 @@ AABCharacter::AABCharacter()
     ArmLengthSpeed = 3.0f;
     ArmRotationSpeed = 10.0f;
     GetCharacterMovement()->JumpZVelocity = 800.0f;
+    IsAttacking = false;
+}
+
+//262페이지인데 여기에 적는 게 맞는지 모르겠습니다.
+void AABCharacter::PostInitializeComponents()
+{
+    Super::PostInitializeComponents();
+    auto AnimInstance = Cast<UABAnimInstance>(GetMesh()->GetAnimInstance());
+    ABCHECK(nullptr != AnimInstance);
+
+    AnimInstance->OnMontageEnded.AddDynamic(this, &AABCharacter::OnAttackMontageEnded);
 }
 
 // Called when the game starts or when spawned
@@ -136,7 +148,8 @@ void AABCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
     PlayerInputComponent->BindAction(TEXT("ViewChange"), EInputEvent::IE_Pressed, this, &AABCharacter::ViewChange);
-    PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Pressed, this, &AABCharacter::Jump);   
+    PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Pressed, this, &AABCharacter::Jump);  
+    PlayerInputComponent->BindAction(TEXT("Attack"), EInputEvent::IE_Pressed, this, &AABCharacter::Attack);
 
     PlayerInputComponent->BindAxis(TEXT("UpDown"), this, &AABCharacter::UpDown);
     PlayerInputComponent->BindAxis(TEXT("LeftRight"), this, &AABCharacter::LeftRight);
@@ -205,4 +218,22 @@ void AABCharacter::ViewChange()
         SetControlMode(EControlMode::GTA);
         break;
     }
+}
+
+void AABCharacter::Attack()
+{
+    if (IsAttacking) return;
+
+    // ABLOG_S(Warning);  이 라인 삭제 후 256페이지 라인 작성
+    auto AnimInstance = Cast<UABAnimInstance>(GetMesh()->GetAnimInstance());
+    if (nullptr == AnimInstance) return;
+
+    AnimInstance->PlayAttackMontage();
+    IsAttacking = true;
+}
+
+void AABCharacter::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+    ABCHECK(IsAttacking);
+    IsAttacking = false;
 }
