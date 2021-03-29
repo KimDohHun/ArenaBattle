@@ -18,7 +18,7 @@ AABCharacter::AABCharacter()
     SpringArm->TargetArmLength = 400.0f;
     SpringArm->SetRelativeRotation(FRotator(-15.0f, 0.0f, 0.0f));
 
-    static ConstructorHelpers::FObjectFinder<USkeletalMesh> SK_CARDBOARD(TEXT("/Game/InfinityBladeWarriors/Character/CompleteCharacter/SK_CharM_Cardboard.SK_CharM_Cardboard"));
+    static ConstructorHelpers::FObjectFinder<USkeletalMesh> SK_CARDBOARD(TEXT("/Game/InfinityBladeWarriors/Character/CompleteCharacters/SK_CharM_Cardboard.SK_CharM_Cardboard"));
     if (SK_CARDBOARD.Succeeded())
     {
         GetMesh()->SetSkeletalMesh(SK_CARDBOARD.Object);
@@ -26,7 +26,7 @@ AABCharacter::AABCharacter()
 
     GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
 
-    static ConstructorHelpers::FClassFinder<UAnimInstance> WARRIOR_ANiM(TEXT("/Game/Book/Animations/WarriorAnimBlueprint.WarriorAnimBlueprint_C"));
+    static ConstructorHelpers::FClassFinder<UAnimInstance> WARRIOR_ANIM(TEXT("/Game/Book/Animations/WarriorAnimBlueprint.WarriorAnimBlueprint_C"));
     if (WARRIOR_ANIM.Succeeded())  //선언되지 않은 식별자라는데 잘 모르겠습니다. 뒤에 블루프린트 관련 에러들도 모두 여기서 비롯되는 듯합니다.
     {
         GetMesh()->SetAnimInstanceClass(WARRIOR_ANIM.Class);
@@ -136,7 +136,7 @@ void AABCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
     PlayerInputComponent->BindAction(TEXT("ViewChange"), EInputEvent::IE_Pressed, this, &AABCharacter::ViewChange);
-    PlayerInputComponent->BindAction(TEXT("JUMP"), EInputEvent::IE_Pressed, this, &AABCharacter::JUMP);  //블루프린트에서 점프 에러를 해결하지 않고 작성해서 빨간줄이 생기는 듯합니다. 
+    PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Pressed, this, &AABCharacter::Jump);   
 
     PlayerInputComponent->BindAxis(TEXT("UpDown"), this, &AABCharacter::UpDown);
     PlayerInputComponent->BindAxis(TEXT("LeftRight"), this, &AABCharacter::LeftRight);
