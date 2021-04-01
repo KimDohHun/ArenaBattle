@@ -40,16 +40,36 @@ AABCharacter::AABCharacter()
     ArmRotationSpeed = 10.0f;
     GetCharacterMovement()->JumpZVelocity = 800.0f;
     IsAttacking = false;
+
+    MaxCombo = 4;
+    AttackEndComboState();
 }
 
 //262페이지인데 여기에 적는 게 맞는지 모르겠습니다.
 void AABCharacter::PostInitializeComponents()
 {
     Super::PostInitializeComponents();
-    auto AnimInstance = Cast<UABAnimInstance>(GetMesh()->GetAnimInstance());
+    /*auto AnimInstance = Cast<UABAnimInstance>(GetMesh()->GetAnimInstance());
     ABCHECK(nullptr != AnimInstance);
 
-    AnimInstance->OnMontageEnded.AddDynamic(this, &AABCharacter::OnAttackMontageEnded);
+    AnimInstance->OnMontageEnded.AddDynamic(this, &AABCharacter::OnAttackMontageEnded);   이 문장들 주석 처리한 후 265페이지 작성 했습니다.  */
+
+    ABAnim = Cast<UABAnimInstance>(GetMesh()->GetAnimInstance());
+    ABCHECK(nullptr != ABAnim);
+
+    ABAnim->OnMontageEnded.AddDynamic(this, &AABCharacter::OnAttackMontageEnded);
+
+    ABAnim->OnNextAttackCheck.AddLambda([this]() -> void {
+        ABLOG(Warning, TEXT("OnNextAttackCheck"));
+        CanNextCombo = false;
+
+        if (IsComboInputOn)
+        {
+            AttackStartComboState();
+            ABAnim->JumpToAttackMontageSection(CurrentCombo);
+        }
+    });
+
 }
 
 // Called when the game starts or when spawned
@@ -222,18 +242,49 @@ void AABCharacter::ViewChange()
 
 void AABCharacter::Attack()
 {
-    if (IsAttacking) return;
-
+    if (IsAttacking) //return;
+    {
+        ABCHECK(FMath::IsWithinInclusive<int32>(CurrentCombo, 1, MaxCombo));
+        if (CanNextCombo)
+        {
+            IsComboInputOn = true;
+        }
+    }
+    else
+    {
+        ABCHECK(CurrentCombo == 0);
+        AttackStartComboState();
+        ABAnim->PlayAttackMontage();
+        ABAnim->JumpToAttackMontageSection(CurrentCombo);
+        IsAttacking = true;
+    }
     // ABLOG_S(Warning);  이 라인 삭제 후 256페이지 라인 작성
-    auto AnimInstance = Cast<UABAnimInstance>(GetMesh()->GetAnimInstance());
+    /* auto AnimInstance = Cast<UABAnimInstance>(GetMesh()->GetAnimInstance());
     if (nullptr == AnimInstance) return;
 
-    AnimInstance->PlayAttackMontage();
-    IsAttacking = true;
+    AnimInstance->PlayAttackMontage();   이 문장 삭제 후 265페이지 작성  */
+    
 }
 
 void AABCharacter::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
     ABCHECK(IsAttacking);
+    ABCHECK(CurrentCombo > 0);
     IsAttacking = false;
+    AttackEndComboState();
+}
+
+void AABCharacter::AttackStartComboState()
+{
+    CanNextCombo = true;
+    IsComboInputOn = false;
+    ABCHECK(FMath::IsWithinInclusive<int32>(CurrentCombo, 0, MaxCombo - 1));
+    CurrentCombo = FMath::Clamp<int32>(CurrentCombo + 1, 1, MaxCombo);
+}
+
+void AABCharacter::AttackEndComboState()
+{
+    IsComboInputOn = false;
+    CanNextCombo = false;
+    CurrentCombo = 0;
 }
