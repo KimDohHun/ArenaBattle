@@ -33,7 +33,7 @@ private:
 	void AnimNotify_AttackHitCheck();
 
 	UFUNCTION()
-	void AnimNottify_NextAttackCheck();
+	void AnimNotify_NextAttackCheck();
 
 	FName GetAttackMontageSectionName(int32 Section);
 

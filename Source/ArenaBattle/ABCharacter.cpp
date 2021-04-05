@@ -43,17 +43,15 @@ AABCharacter::AABCharacter()
 
     MaxCombo = 4;
     AttackEndComboState();
+
+    //이 라인 291페이지에 나오는데 이 스코프에 써야 할지 맨 밑에 써야 하는지 헤갈림.
+    GetCapsuleComponent()->SetCollisionProfileName(TEXT("ABCharacter"));
 }
 
-//262페이지인데 여기에 적는 게 맞는지 모르겠습니다.
 void AABCharacter::PostInitializeComponents()
 {
     Super::PostInitializeComponents();
-    /*auto AnimInstance = Cast<UABAnimInstance>(GetMesh()->GetAnimInstance());
-    ABCHECK(nullptr != AnimInstance);
-
-    AnimInstance->OnMontageEnded.AddDynamic(this, &AABCharacter::OnAttackMontageEnded);   이 문장들 주석 처리한 후 265페이지 작성 했습니다.  */
-
+    
     ABAnim = Cast<UABAnimInstance>(GetMesh()->GetAnimInstance());
     ABCHECK(nullptr != ABAnim);
 
@@ -69,7 +67,7 @@ void AABCharacter::PostInitializeComponents()
             ABAnim->JumpToAttackMontageSection(CurrentCombo);
         }
     });
-
+    ABAnim->OnAttackHitCheck.AddUObject(this, &AABCharacter::AttackCheck); //298페이지 라인. 스코프를 잘 몰라서 여기에 작성
 }
 
 // Called when the game starts or when spawned
@@ -79,23 +77,6 @@ void AABCharacter::BeginPlay()
 	
 }
 
-/*void AABCharacter::SetControlMode(int32 ControlMode)
-{
-    if (ControlMode == 0)
-    {
-        SpringArm->TargetArmLength = 450.0f;
-        SpringArm->SetRelativeRotation(FRotator::ZeroRotater);
-        SpringArm->bUsePawnControlRotation = true;
-        SpringArm->bInheritPitch = true;
-        SpringArm->bInheritRoll = true;
-        SpringArm->bInheritYaw = true;
-        SpringArm->bDoCollisionTest = true;
-        bUseControllerRotationYaw = false;
-        GetCharacterMovement()->bOrientRotationToMovement = true;
-        GetCharacterMovement()->RotationRate = FRotator(0.0f, 720.0f, 0.0f);
-    }
-}  이 라인들 삭제한 후 밑에 라인들 작성했습니다. 193P */
-
 void AABCharacter::SetControlMode(EControlMode NewControlMode)
 {
     CurrentControlMode = NewControlMode;
@@ -104,8 +85,6 @@ void AABCharacter::SetControlMode(EControlMode NewControlMode)
     {
     case EControlMode::GTA:
 
-        //SpringArm->TargetArmLength = 450.0f
-        //SpringArm->SetRelativeRotation(FRotator::ZeroRotater);
         ArmLengthTo = 450.0f;
         SpringArm->bUsePawnControlRotation = true;
         SpringArm->bInheritPitch = true;
@@ -118,8 +97,7 @@ void AABCharacter::SetControlMode(EControlMode NewControlMode)
         GetCharacterMovement()->RotationRate = FRotator(0.0f, 720.0f, 0.0f);
         break;
     case EControlMode::DIABLO:
-        //SpringArm->TargetArmLength = 800.0f
-        //SpringArm->SetRelativeRotation(FRotator(-45.0f, 0.0f, 0.0f));
+        
         ArmLengthTo = 800.0f;
         ArmRotationTo = FRotator(-45.0f, 0.0f, 0.0f);
         SpringArm->bUsePawnControlRotation = false;
@@ -258,11 +236,6 @@ void AABCharacter::Attack()
         ABAnim->JumpToAttackMontageSection(CurrentCombo);
         IsAttacking = true;
     }
-    // ABLOG_S(Warning);  이 라인 삭제 후 256페이지 라인 작성
-    /* auto AnimInstance = Cast<UABAnimInstance>(GetMesh()->GetAnimInstance());
-    if (nullptr == AnimInstance) return;
-
-    AnimInstance->PlayAttackMontage();   이 문장 삭제 후 265페이지 작성  */
     
 }
 
@@ -287,4 +260,26 @@ void AABCharacter::AttackEndComboState()
     IsComboInputOn = false;
     CanNextCombo = false;
     CurrentCombo = 0;
+}
+
+void AABCharacter::AttackCheck()
+{
+    FHitResult HitResult;
+    FCollisionQueryParams Params(NAME_None, false, this);
+    bool bResult = GetWorld()->SweepSingleByChannel(
+        HitResult,
+        GetActorLocation(),
+        GetActorLocation() + GetActorForwardVector() * 200.0f,
+        FQuat::Identity,
+        ECollisionChannel::ECC_GameTraceChannel2,
+        FCollisionShape::MakeSphere(50.0f),
+        Params);
+
+    if (bResult)
+    {
+        if (HitResult.Actor.IsValid())
+        {
+            ABLOG(Warning, TEXT("Hit Actor Name : %s"), *HitResult.Actor->GetName());
+        }
+    }
 }

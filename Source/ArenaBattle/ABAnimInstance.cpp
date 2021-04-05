@@ -39,11 +39,6 @@ void UABAnimInstance::PlayAttackMontage()
 	}
 }
 
-void UABAnimInstance::AnimNotify_AttackHitCheck()
-{
-	ABLOG_S(Warning);
-}
-
 void UABAnimInstance::JumpToAttackMontageSection(int32 NewSection)
 {
 	ABCHECK(Montage_IsPlaying(AttackMontage));
