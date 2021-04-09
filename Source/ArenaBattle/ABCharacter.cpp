@@ -3,6 +3,7 @@
 
 #include "ABCharacter.h"
 #include "ABAnimInstance.h"
+#include "ABCharacter.h"
 #include "DrawDebugHelpers.h"
 
 // Sets default values
@@ -29,12 +30,24 @@ AABCharacter::AABCharacter()
     GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
 
     static ConstructorHelpers::FClassFinder<UAnimInstance> WARRIOR_ANIM(TEXT("/Game/Book/Animations/WarriorAnimBlueprint.WarriorAnimBlueprint_C"));
-    if (WARRIOR_ANIM.Succeeded())  //선언되지 않은 식별자라는데 잘 모르겠습니다. 뒤에 블루프린트 관련 에러들도 모두 여기서 비롯되는 듯합니다.
+    if (WARRIOR_ANIM.Succeeded())  
     {
         GetMesh()->SetAnimInstanceClass(WARRIOR_ANIM.Class);
     }
 
-    //SetControlMode(0);
+    FName WeaponSocket(TEXT("hand_rSocket"));
+    if (GetMesh()->DoesSocketExist(WeaponSocket))
+    {
+        Weapon = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WEAPON"));
+        static ConstructorHelpers::FObjectFinder<USkeletalMesh> SK_WEAPON(TEXT("/Game/InfinityBladeWeapons/Weapons/Blade/Swords/Blade_BlackKnight/SK_Blade_BlackKnight.SK_Blade_BlackKnight"));
+        if (SK_WEAPON.Succeeded())
+        {
+            Weapon->SetSkeletalMesh(SK_WEAPON.Object);
+        }
+
+        Weapon->SetupAttachment(GetMesh(), WeaponSocket);
+    }
+
     SetControlMode(EControlMode::DIABLO);
 
     ArmLengthSpeed = 3.0f;
@@ -45,7 +58,6 @@ AABCharacter::AABCharacter()
     MaxCombo = 4;
     AttackEndComboState();
 
-    //이 라인 291페이지에 나오는데 이 스코프에 써야 할지 맨 밑에 써야 하는지 헤갈림.
     GetCapsuleComponent()->SetCollisionProfileName(TEXT("ABCharacter"));
 
     AttackRange = 200.0f;
@@ -61,7 +73,8 @@ void AABCharacter::PostInitializeComponents()
 
     ABAnim->OnMontageEnded.AddDynamic(this, &AABCharacter::OnAttackMontageEnded);
 
-    ABAnim->OnNextAttackCheck.AddLambda([this]() -> void {
+    ABAnim->OnNextAttackCheck.AddLambda([this]()
+        {
         ABLOG(Warning, TEXT("OnNextAttackCheck"));
         CanNextCombo = false;
 
@@ -71,7 +84,7 @@ void AABCharacter::PostInitializeComponents()
             ABAnim->JumpToAttackMontageSection(CurrentCombo);
         }
     });
-    ABAnim->OnAttackHitCheck.AddUObject(this, &AABCharacter::AttackCheck); //298페이지 라인. 스코프를 잘 몰라서 여기에 작성
+    ABAnim->OnAttackHitCheck.AddUObject(this, &AABCharacter::AttackCheck); 
 }
 
 // Called when the game starts or when spawned
@@ -79,6 +92,12 @@ void AABCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
+    FName WeaponSocket(TEXT("hand_rSocket"));
+    auto CurWeapon = GetWorld()->SpawnActor<AABWeapon>(FVector::ZeroVector, FRotator::ZeroRotator); //324페이지 이 라인 뒤에 붙는 기호 모르겠습니다.
+    if (nullptr != CurWeapon)
+    {
+        CurWeapon->AttackToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponSocket);
+    }
 }
 
 void AABCharacter::SetControlMode(EControlMode NewControlMode)
@@ -127,7 +146,7 @@ void AABCharacter::Tick(float DeltaTime)
     switch (CurrentControlMode)
     {
     case EControlMode::DIABLO:
-        SpringArm->RelativeRotation = FMath::RInterpTo(SpringArm->RelativeRotation, ArmRotationTo, DeltaTime, ArmRotationSpeed);
+        SpringArm->SetRelativeRotation (FMath::RInterpTo(SpringArm->GetRelativeRotation(), ArmRotationTo, DeltaTime, ArmRotationSpeed));
         break;
 
     }
@@ -216,7 +235,7 @@ void AABCharacter::ViewChange()
         SetControlMode(EControlMode::DIABLO);
         break;
     case EControlMode::DIABLO:
-        GetController()->SetControlRotation(SpringArm->RelativeRotation);
+        GetController()->SetControlRotation(SpringArm->GetRelativeRotation());
         SetControlMode(EControlMode::GTA);
         break;
     }
@@ -224,7 +243,7 @@ void AABCharacter::ViewChange()
 
 void AABCharacter::Attack()
 {
-    if (IsAttacking) //return;
+    if (IsAttacking) 
     {
         ABCHECK(FMath::IsWithinInclusive<int32>(CurrentCombo, 1, MaxCombo));
         if (CanNextCombo)
@@ -266,28 +285,6 @@ void AABCharacter::AttackEndComboState()
     CurrentCombo = 0;
 }
 
-/*void AABCharacter::AttackCheck()
-{
-    FHitResult HitResult;
-    FCollisionQueryParams Params(NAME_None, false, this);
-    bool bResult = GetWorld()->SweepSingleByChannel(
-        HitResult,
-        GetActorLocation(),
-        GetActorLocation() + GetActorForwardVector() * 200.0f,
-        FQuat::Identity,
-        ECollisionChannel::ECC_GameTraceChannel2,
-        FCollisionShape::MakeSphere(50.0f),
-        Params);
-
-    if (bResult)
-    {
-        if (HitResult.Actor.IsValid())
-        {
-            ABLOG(Warning, TEXT("Hit Actor Name : %s"), *HitResult.Actor->GetName());
-        }
-    }   302페이지 라인 작성 전에 이 부분 주석 처리했습니다.  */
-
-    //302페이지 라인들 작성 스코프가 확실하지 않습니다. 
 void AABCharacter::AttackCheck()
 {
     FHitResult HitResult;
@@ -304,7 +301,7 @@ void AABCharacter::AttackCheck()
 #if ENABLE_DRAW_DEBUG
 
     FVector TraceVec = GetActorForwardVector() * AttackRange;
-    FVector Center = GetActorLocation + TraceVec * 0.5F;
+    FVector Center = GetActorLocation() + TraceVec * 0.5f;
     float HalfHeight = AttackRange * 0.5f + AttackRadius;
     FQuat CapsuleRot = FRotationMatrix::MakeFromZ(TraceVec).ToQuat();
     FColor DrawColor = bResult ? FColor::Green : FColor::Red;
@@ -326,7 +323,24 @@ void AABCharacter::AttackCheck()
         if (HitResult.Actor.IsValid())
         {
             ABLOG(Warning, TEXT("Hit Actor Name : %s"), *HitResult.Actor->GetName());
+
+            FDamageEvent DamageEvent;
+            HitResult.Actor->TakeDamage(50.0f, DamageEvent, GetController(), this);
         }
     }
 }
 
+//306페이지 라인 작성 위치가 확실하지 않습니다. 
+float AABCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController * EventInstigator, AActor * DamageCauser)
+{
+    float FinalDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+    ABLOG(Warning, TEXT("Actor : %s took Damage : %f"), *GetName(), FinalDamage);
+
+    if (FinalDamage > 0.0f)
+    {
+        ABAnim->SetDeadAnim();
+        SetActorEnableCollision(false);
+    }
+
+    return FinalDamage;
+}
