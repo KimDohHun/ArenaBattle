@@ -3,7 +3,8 @@
 
 #include "ABCharacter.h"
 #include "ABAnimInstance.h"
-#include "ABCharacter.h"
+#include "ABCharacter.h"  //방금 발견했는데 헤더가 두 개 입니다. 하나 지워도 되는지요?
+#include "ABWeapon.h"
 #include "DrawDebugHelpers.h"
 
 // Sets default values
@@ -88,15 +89,37 @@ void AABCharacter::PostInitializeComponents()
 }
 
 // Called when the game starts or when spawned
-void AABCharacter::BeginPlay()
+/* void AABCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
     FName WeaponSocket(TEXT("hand_rSocket"));
-    auto CurWeapon = GetWorld()->SpawnActor<AABWeapon>(FVector::ZeroVector, FRotator::ZeroRotator); //324페이지 이 라인 뒤에 붙는 기호 모르겠습니다.
+    auto CurWeapon = GetWorld()->SpawnActor<AABWeapon>(FVector::ZeroVector, FRotator::ZeroRotator); 
     if (nullptr != CurWeapon)
     {
-        CurWeapon->AttackToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponSocket);
+        CurWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponSocket);
+    }
+}    이 부분이 338페이지 교재와 너무 다릅니다. ㅠㅠ 그래서 밑에 라인을 새로 작성했습니다.  */
+
+void AABCharacter::BeginPlay()
+{
+    Super::BeginPlay();
+}
+
+bool AABCharacter::CanSetWeapon()
+{
+    return (nullptr == CurrentWeapon);
+}
+
+void AABCharacter::SetWeapon(AABWeapon* NewWeapon)
+{
+    ABCHECK(nullptr != NewWeapon && nullptr == NewWeapon);
+    FName WeaponSocket(TEXT("hand_rSocket"));
+    if (nullptr != NewWeapon)
+    {
+        NewWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponSocket);
+        NewWeapon->SetOwner(this);
+        CurrentWeapon = NewWeapon;
     }
 }
 
