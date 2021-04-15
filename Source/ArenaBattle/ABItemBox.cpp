@@ -66,6 +66,7 @@ void AABItemBox::OnCharacterOverlap(UPrimitiveComponent* OverlappedComp, AActor*
 		if (ABCharacter->CanSetWeapon())
 		{
 			auto NewWeapon = GetWorld()->SpawnActor<AABWeapon>(WeaponItemClass, FVector::ZeroVector, FRotator::ZeroRotator);
+			//사실상 AABWeapon이 접근형식이고 웨폰아이템클래스가 실형식, 실제로 메모리에 올라온 건 BP웨폰엑스(도끼)
 			ABCharacter->SetWeapon(NewWeapon);
 			Effect->Activate(true);
 			Box->SetHiddenInGame(true, true);

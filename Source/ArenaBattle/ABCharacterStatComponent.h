@@ -26,9 +26,12 @@ public:
 
 	// Called every frame
 	// virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;   이 라인이 365페이지에 적혀 있지 않아서 주석 처리했습니다.
-
+	// 컴포넌트란 독립적으로 존재하는 게 아니라 어떤 객체에 부착시켜야 하는 것
 private:
 	struct FABCharacterData* CurrentStatData = nullptr;
+
+	UPROPERTY(EditInstanceOnly, Category = "Stat", Meta = (AllowPrivateAccess = true))
+	int32 Level;
 
 	UPROPERTY(Transient, VisibleInstanceOnly, Category = "Stat", Meta = (AllowPrivateAccess = true))
 	float CurrentHP;

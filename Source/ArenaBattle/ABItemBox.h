@@ -30,7 +30,7 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = "Effect")
 	UParticleSystemComponent* Effect;
 
-	UPROPERTY(VisibleAnywhere, Category = "Box")
+	UPROPERTY(EditAnywhere, Category = "Box")
 	TSubclassOf<class AABWeapon> WeaponItemClass;
 
 private:

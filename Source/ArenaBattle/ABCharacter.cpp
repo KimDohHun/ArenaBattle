@@ -14,7 +14,7 @@ AABCharacter::AABCharacter()
 	PrimaryActorTick.bCanEverTick = true;
     SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SPRINGARM"));
     Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("CAMERA"));
-    CharacterStat = CreateDefaultSubobject<UABCharacterStatComponent>(TEXT("CHARACTERSTAT"));
+    CharacterStat = CreateDefaultSubobject<UABCharacterStatComponent>(TEXT("CHARACTERSTAT"));  //CharacterStatComponent가 생성되는 시점은 AABCharacter 생성자가 호출되는 시점ㅇ.다
 
     SpringArm->SetupAttachment(GetCapsuleComponent());
     Camera->SetupAttachment(SpringArm);

@@ -9,16 +9,16 @@ UABGameInstance::UABGameInstance()
 	static ConstructorHelpers::FObjectFinder<UDataTable> DT_ABCHARACTER(*CharacterDataPath);
 	ABCHECK(DT_ABCHARACTER.Succeeded());
 	ABCharacterTable = DT_ABCHARACTER.Object;
-	ABCHECK(ABCharacterTable->RowMap.Num() > 0);    //이 라인에서 에서가 나타나는데 이유를 모르겠습니다. 
+	ABCHECK(ABCharacterTable->GetRowMap().Num() > 0);    //여기서 row는 '행'을 의미하고 이 행을 가져온단 것. 이때 이 행은 0보다 커야 한단 것. 
 }
 
-/* void UABGameInstance::Init()
+void UABGameInstance::Init()
 {
 	Super::Init();
-	ABLOG(Warning, TEXT("DropExp of Level 20 ABCharacter : %d"), GetABCharacterData(20)->DropExp);
-}  359페이지에서 데이터가 확인됐다면 Init 함수 코드를 삭제하라는 말이 있습니다. 로그를 확인하지 못했고 에러를 찾지 못해서 일단 삭제했습니다. */
+}  
 
-FABCharacterData* UABGameInstance::GetABCharacterData(int32 Level)
-{
-	return ABCharacterTable->FindRow<FABCharacterData>(*FString::FromInt(Level), TEXT(""));
+FABCharacterData* UABGameInstance::GetABCharacterData(int32 Level)  //여기서 Get을 사용해야 하는 이유는 이게 프라이빗으로 선언돼 있기도 해서지만 퍼블릭으로 선언돼 있어도 유지보수가 쉽기에 get을 사용한다. 
+{   //GetABCharacterData에서 레벨을 숫자로 받은 후 FString 네임으로 바꿔서 역참조. 여기서 GetABCharacterData를 사용할 수 있는 이유는 8행에서 F오브젝트파인더로 파일을 찾았기 때문. 
+	return ABCharacterTable->FindRow<FABCharacterData>(*FString::FromInt(Level), TEXT(""));  //이때 FABCharacterData타입으로 가져오는 이유는 우리가 이러한 타입으로 데이터는 넘겼기 때문. *는 역참조. 
+  //
 }

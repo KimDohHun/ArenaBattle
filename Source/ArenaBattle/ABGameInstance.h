@@ -8,7 +8,7 @@
 #include "ABGameInstance.generated.h"
 
 USTRUCT(BlueprintType)
-struct FABCharacterData : public FTableRowBase
+struct FABCharacterData : public FTableRowBase  //FTableRowBase 이건 엔진 자체에서 사용하는 함수
 {
 	GENERATED_BODY()
 
@@ -35,7 +35,7 @@ public:
  * 
  */
 UCLASS()
-class ARENABATTLE_API UABGameInstance : public UGameInstance
+class ARENABATTLE_API UABGameInstance : public UGameInstance  
 {
 	GENERATED_BODY()
 
@@ -43,7 +43,7 @@ public:
 	UABGameInstance();
 
 	virtual void Init() override;
-	FABCharacterData* GetABCharacterData(int32 Level);
+	FABCharacterData* GetABCharacterData(int32 Level);  //ABCharacterTable이 프라이빗으로 선언돼 있어서 Get함수를 사용해서 가져옴. 이때 인자로 레벨을 주면 18행 부터 21행이 채워짐.
 
 private:
 	UPROPERTY()

@@ -10,7 +10,7 @@ UABCharacterStatComponent::UABCharacterStatComponent()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = false;
-	bWantsInitializeComponent = true;
+	bWantsInitializeComponent = true;  //이게 호출되면 밑에 UABCharacterStatComponent::InitializeComponent()가 호출되고 false면 호출 안 됨.
 
 	Level = 1;
 
@@ -35,11 +35,11 @@ void UABCharacterStatComponent::InitializeComponent()
 
 void UABCharacterStatComponent::SetNewLevel(int32 NewLevel)
 {
-	auto ABGameInstance = Cast<UABGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
+	auto ABGameInstance = Cast<UABGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));  //GetGameInstance를 가지고 오는 이유는 여기에 스탯이 저장돼 있기 때문. 이것을 온전히 사용하기 위해 UABGameInstance를 실형식으로 가져옴. 
 
 	ABCHECK(nullptr != ABGameInstance);
-	CurrentStatData = ABGameInstance->GetABCharacterData(NewLevel);
-	if (nullptr != CurrentStatData)
+	CurrentStatData = ABGameInstance->GetABCharacterData(NewLevel);  //프라이빗은 온전히 자기 클래스 안에서만 접근 가능하다. ABGameInstance.cpp의 20행에서 스탯데이터를 받으면 여기로 넘어옴. 
+	if (nullptr != CurrentStatData)  //만약 커런트데이터가 유효한 데이터면
 	{
 		Level = NewLevel;
 		CurrentHP = CurrentStatData->MaxHP;
@@ -57,5 +57,5 @@ void UABCharacterStatComponent::SetNewLevel(int32 NewLevel)
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	// ...
-}     이 라인들 364페이지에 적혀 있지 않아서 주석 처리했습니다.   */
+}     이 라인들 364페이지에 적혀 있지 않아서 주석 처리했습니다. 그냥 둬도 상관 없다. 위에서 bCanEverTick를 false로 했디 깨문이다.    */
 
