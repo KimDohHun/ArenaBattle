@@ -50,9 +50,9 @@ void AABItemBox::BeginPlay()
 }
 
 // Called every frame
-void AABItemBox::PostInitializeComponents()    //원래 여기에 Tick(float DeltaTime) 이 있었습니다.
+void AABItemBox::PostInitializeComponents()    
 {
-	Super::PostInitializeComponents();   //328페이지 작성 후 여기서 "멤버 함수를 AABItemBox에서 선언하지 않았습니다."라는 에러 메시지 발생. 하지만 교재에선 이 부분에 추가하는 함수가 없습니다. 
+	Super::PostInitializeComponents();    
 	Trigger->OnComponentBeginOverlap.AddDynamic(this, &AABItemBox::OnCharacterOverlap);
 
 }
@@ -61,9 +61,8 @@ void AABItemBox::OnCharacterOverlap(UPrimitiveComponent* OverlappedComp, AActor*
 {
 	ABLOG_S(Warning);
 
-	auto ABCharacter = Cast<AABCharacter>(OtherActor);
-	ABCHECK(nullptr != ABCharacter && nullptr != WeaponItemClass)
-	{
+	auto ABCharacter = Cast<AABCharacter>(OtherActor);  //otheractor을 AABCharacter로 캐스팅하는 이유는 Cansetweapon과 newweapon 한수가 AABCharacter에 있어서 이것들을 사용하기 위해서다. 
+	ABCHECK(nullptr != ABCharacter && nullptr != WeaponItemClass);
 		if (ABCharacter->CanSetWeapon())
 		{
 			auto NewWeapon = GetWorld()->SpawnActor<AABWeapon>(WeaponItemClass, FVector::ZeroVector, FRotator::ZeroRotator);
@@ -77,10 +76,10 @@ void AABItemBox::OnCharacterOverlap(UPrimitiveComponent* OverlappedComp, AActor*
 		{
 			ABLOG(Warning, TEXT("%S can't equip weapon currently."), *ABCharacter->GetName());
 		}
-	}
+
 }
 
 void AABItemBox::OnEffectFinished(UParticleSystemComponent* PSystem)
 {
-	Destory();
+	Destroy();
 }

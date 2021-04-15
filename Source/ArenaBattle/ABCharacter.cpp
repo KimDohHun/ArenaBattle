@@ -3,8 +3,8 @@
 
 #include "ABCharacter.h"
 #include "ABAnimInstance.h"
-#include "ABCharacter.h"  //방금 발견했는데 헤더가 두 개 입니다. 하나 지워도 되는지요?
-#include "ABWeapon.h"
+#include "ABWeapon.h"  
+#include "ABCharacterStatComponent.h"
 #include "DrawDebugHelpers.h"
 
 // Sets default values
@@ -14,6 +14,7 @@ AABCharacter::AABCharacter()
 	PrimaryActorTick.bCanEverTick = true;
     SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SPRINGARM"));
     Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("CAMERA"));
+    CharacterStat = CreateDefaultSubobject<UABCharacterStatComponent>(TEXT("CHARACTERSTAT"));
 
     SpringArm->SetupAttachment(GetCapsuleComponent());
     Camera->SetupAttachment(SpringArm);
@@ -34,19 +35,6 @@ AABCharacter::AABCharacter()
     if (WARRIOR_ANIM.Succeeded())  
     {
         GetMesh()->SetAnimInstanceClass(WARRIOR_ANIM.Class);
-    }
-
-    FName WeaponSocket(TEXT("hand_rSocket"));
-    if (GetMesh()->DoesSocketExist(WeaponSocket))
-    {
-        Weapon = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WEAPON"));
-        static ConstructorHelpers::FObjectFinder<USkeletalMesh> SK_WEAPON(TEXT("/Game/InfinityBladeWeapons/Weapons/Blade/Swords/Blade_BlackKnight/SK_Blade_BlackKnight.SK_Blade_BlackKnight"));
-        if (SK_WEAPON.Succeeded())
-        {
-            Weapon->SetSkeletalMesh(SK_WEAPON.Object);
-        }
-
-        Weapon->SetupAttachment(GetMesh(), WeaponSocket);
     }
 
     SetControlMode(EControlMode::DIABLO);
@@ -89,17 +77,6 @@ void AABCharacter::PostInitializeComponents()
 }
 
 // Called when the game starts or when spawned
-/* void AABCharacter::BeginPlay()
-{
-	Super::BeginPlay();
-	
-    FName WeaponSocket(TEXT("hand_rSocket"));
-    auto CurWeapon = GetWorld()->SpawnActor<AABWeapon>(FVector::ZeroVector, FRotator::ZeroRotator); 
-    if (nullptr != CurWeapon)
-    {
-        CurWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponSocket);
-    }
-}    이 부분이 338페이지 교재와 너무 다릅니다. ㅠㅠ 그래서 밑에 라인을 새로 작성했습니다.  */
 
 void AABCharacter::BeginPlay()
 {
@@ -113,14 +90,13 @@ bool AABCharacter::CanSetWeapon()
 
 void AABCharacter::SetWeapon(AABWeapon* NewWeapon)
 {
-    ABCHECK(nullptr != NewWeapon && nullptr == NewWeapon);
+    ABCHECK(nullptr != NewWeapon && nullptr == CurrentWeapon);
+
     FName WeaponSocket(TEXT("hand_rSocket"));
-    if (nullptr != NewWeapon)
-    {
-        NewWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponSocket);
-        NewWeapon->SetOwner(this);
-        CurrentWeapon = NewWeapon;
-    }
+    NewWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponSocket);
+    NewWeapon->SetOwner(this);
+    CurrentWeapon = NewWeapon;
+    
 }
 
 void AABCharacter::SetControlMode(EControlMode NewControlMode)

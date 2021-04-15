@@ -21,16 +21,16 @@ protected:
 	virtual void PostInitializeComponents() override;
 
 public:	
-	UPROPERTY(VisibleAnywhere, Category = Box)
+	UPROPERTY(VisibleAnywhere, Category = "Box")
 	UBoxComponent* Trigger;
 
-	UPROPERTY(VisibleAnywhere, Category = Box)
+	UPROPERTY(VisibleAnywhere, Category = "Box")
 	UStaticMeshComponent* Box;
 
 	UPROPERTY(VisibleAnywhere, Category = "Effect")
 	UParticleSystemComponent* Effect;
 
-	UPROPERTY(VisibleAnywhere, Category = Box)
+	UPROPERTY(VisibleAnywhere, Category = "Box")
 	TSubclassOf<class AABWeapon> WeaponItemClass;
 
 private:
