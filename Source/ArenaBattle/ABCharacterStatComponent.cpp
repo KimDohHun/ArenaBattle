@@ -62,7 +62,7 @@ void UABCharacterStatComponent::SetNewLevel(int32 NewLevel)
 void UABCharacterStatComponent::SetDamage(float NewDamage)
 {
 	ABCHECK(nullptr != CurrentStatData);
-	SetHP(FMath::Clamp<float>(CurrentHP - NewDamage, 0.0f, CurrentStatData->MaxHP));
+	SetHP(FMath::Clamp<float>(CurrentHP - NewDamage, 0.0f, CurrentStatData->MaxHP));   //이때 클램프엑스는 음수가 들어올 수도 있다. 미니멈보다 작으면 미니멈으로세팅. 대미지가 아무리 커도 Hp의 최소값은 0. 
 
 	/*   CurrentHP = FMath::Clamp<float>(CurrentHP - NewDamage, 0.0f, CurrentStatData->MaxHP);
 	if (CurrentHP <= 0.0f)
@@ -71,18 +71,18 @@ void UABCharacterStatComponent::SetDamage(float NewDamage)
 	}   386페이지에 이 라인들 없어서 일단 주석처리했습니다.  */
 }
 
-void UABCharacterStatComponent::SetHP(float NewHP)
+void UABCharacterStatComponent::SetHP(float NewHP)  //65라인의 셋HP가 여기에서 뉴Hp로 들어옴. 
 {
 	CurrentHP = NewHP;
-	OnHPChanged.Broadcast();
-	if (CurrentHP < KINDA_SMALL_NUMBER)
+	OnHPChanged.Broadcast();  //셋Hp가 불려졌단 건 Hp에 변화가 있었단 것이고
+	if (CurrentHP < KINDA_SMALL_NUMBER)   //이때 Hp변화가 있어서 딜리게이트가 호출됨. 현재 Hp가 010001보다 작아지면(0이 안 될수도 있으니까. 플롯은)
 	{
 		CurrentHP = 0.0f;
-		OnHPIsZero.Broadcast();
+		OnHPIsZero.Broadcast();   //OnHPIsZero에 등록된 함수들을 Broadcast한다. 
 	}
 }
 
-float UABCharacterStatComponent::GetAttack()
+float UABCharacterStatComponent::GetAttack()  //어택이라는 변수를 반환하는 함수
 {
 	ABCHECK(nullptr != CurrentStatData, 0.0f);
 	return CurrentStatData->Attack;
@@ -92,5 +92,5 @@ float UABCharacterStatComponent::GetHPRatio()
 {
 	ABCHECK(nullptr != CurrentStatData, 0.0f);
 
-	return (CurrentStatData->MaxHP < KINDA_SMALL_NUMBER) ? 0.0f : (CurrentHP / CurrentStatData->MaxHP);
+	return (CurrentHP < KINDA_SMALL_NUMBER) ? 0.0f : (CurrentHP / CurrentStatData->MaxHP);  //킨다스몰넘버를사용, 큐런트hp가 100일 때 맥스 hp가 200이면 0.5를 반환. 
 }

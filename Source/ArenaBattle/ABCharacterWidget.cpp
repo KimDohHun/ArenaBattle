@@ -13,7 +13,7 @@ void UABCharacterWidget::BindCharacterStat(UABCharacterStatComponent* NewCharact
 
 		if (CurrentCharacterStat.IsValid())
 		{
-			ABLOG(Warning, TEXT("HPRatio : %f"), CurrentCharacterStat->GetHPRatio());   //이건 단순히 로그 출력
+			ABLOG(Warning, TEXT("HPRatio : %f"), CurrentCharacterStat->GetHPRatio());   //이건 단순히 로그 출력, 테이크데미지가 호출돼야 람다 로그가 뜬다. 그니까 공격받는 대상이 있어야함.
 		}
 
 		});

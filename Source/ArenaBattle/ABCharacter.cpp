@@ -17,7 +17,7 @@ AABCharacter::AABCharacter()
     SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SPRINGARM"));
     Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("CAMERA"));
     CharacterStat = CreateDefaultSubobject<UABCharacterStatComponent>(TEXT("CHARACTERSTAT"));  //CharacterStatComponent가 생성되는 시점은 AABCharacter 생성자가 호출되는 시점ㅇ.다
-    HPBarWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("HPBARWIDGET"));
+    HPBarWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("HPBARWIDGET"));   //위젯 컴포넌트를  HPBar위젯어 부착
 
     SpringArm->SetupAttachment(GetCapsuleComponent());
     Camera->SetupAttachment(SpringArm);
@@ -58,11 +58,11 @@ AABCharacter::AABCharacter()
 
     //381페이지 라인. 여기에 작성하는 게 확실하지 않습니다. 
     HPBarWidget->SetRelativeLocation(FVector(0.0f, 0.0f, 180.0f));
-    HPBarWidget->SetWidgetSpace(EWidgetSpace::Screen);
-    static ConstructorHelpers::FClassFinder<UUserWidget> UI_HUD(TEXT("/Game/Book/UI/UI_HPBar.UI_HPBar_C"));
+    HPBarWidget->SetWidgetSpace(EWidgetSpace::Screen);   //4개의 좌표계 중 하나인 스크린 좌표계. 만약 world 좌표게를 사용하면 약간 홀로그램같이 된다. 
+    static ConstructorHelpers::FClassFinder<UUserWidget> UI_HUD(TEXT("/Game/Book/UI/UI_HPBar.UI_HPBar_C"));  //클래스파인더로 클래스를 가져옴
     if (UI_HUD.Succeeded())
     {
-        HPBarWidget->SetWidgetClass(UI_HUD.Class);
+        HPBarWidget->SetWidgetClass(UI_HUD.Class);   //HP바도 UIHUD를 하나 가지고 있다. UIHud가 곧 위젯이다. 이때에는 상속이 아니라 그냥 가지고 있는 거다. 위젯 컴포넌트는 상속 관계가 아니라 위젯을 그냥 가지고 있다. 셋위젯 클래스를 하는 이유는 ...  HPBar가 UI로 변하는 게 아니라 HP바가 위젯 안에 변수로 들어감. 
         HPBarWidget->SetDrawSize(FVector2D(150.0f, 50.0f));
     }
 
@@ -102,20 +102,13 @@ void AABCharacter::PostInitializeComponents()
 
 //370페이지 라인입니다. 원래 357라인에 있던 것을 이 위치로 옮겼습니다. 
 float AABCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
-{
+{   //여기서부터는 맞은애로 넘어온다. 370라인에서 여기로 넘어옴. 
     float FinalDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
     ABLOG(Warning, TEXT("Actor : %s took Damage : %f"), *GetName(), FinalDamage);
 
     CharacterStat->SetDamage(FinalDamage);
     return FinalDamage;    //이 라인이 원래 여기에 없었는데 370페이지에 적혀 있어서 새로 작성했습니다. 102라인과 겹쳐서 문제가 되지는 않을까요??
 
-    if (FinalDamage > 0.0f)
-    {
-        ABAnim->SetDeadAnim();
-        SetActorEnableCollision(false);
-    }
-
-    return FinalDamage;
 }
 
 // Called when the game starts or when spawned
@@ -374,8 +367,8 @@ void AABCharacter::AttackCheck()
             ABLOG(Warning, TEXT("Hit Actor Name : %s"), *HitResult.Actor->GetName());
 
             FDamageEvent DamageEvent;
-            HitResult.Actor->TakeDamage(CharacterStat->GetAttack(), DamageEvent, GetController(), this);
-        }
+            HitResult.Actor->TakeDamage(CharacterStat->GetAttack(), DamageEvent, GetController(), this);  //맞은애의 테이크대미지를 호출, 맞은대미지를 TakeDamage의 첫번째 인자로 호출. 
+        }   //여기서 액터로 돼 있지만 사실 실형식은 A캐릭터
     }
 }
 
