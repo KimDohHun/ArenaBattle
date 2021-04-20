@@ -98,12 +98,6 @@ void AABCharacter::PostInitializeComponents()
 
         });
 
-    auto CharacterWidget = Cast<UABCharacterWidget>(HPBarWidget->GetUserWidgetObject());
-    if (nullptr != CharacterWidget)
-    {
-        CharacterWidget->BindCharacterStat(CharacterStat);
-    }
-
 }
 
 //370페이지 라인입니다. 원래 357라인에 있던 것을 이 위치로 옮겼습니다. 
