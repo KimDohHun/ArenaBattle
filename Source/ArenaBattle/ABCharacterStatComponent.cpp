@@ -42,7 +42,7 @@ void UABCharacterStatComponent::SetNewLevel(int32 NewLevel)
 	if (nullptr != CurrentStatData)  //만약 커런트데이터가 유효한 데이터면
 	{
 		Level = NewLevel;
-		CurrentHP = CurrentStatData->MaxHP;
+		SetHP(CurrentStatData->MaxHP);    // 원래 이 라인이 있었는데 이거 삭제하고 385페이지 작성했습니다. CurrentHP = CurrentStatData->MaxHP;
 	}
 	else
 	{
@@ -57,5 +57,40 @@ void UABCharacterStatComponent::SetNewLevel(int32 NewLevel)
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	// ...
-}     이 라인들 364페이지에 적혀 있지 않아서 주석 처리했습니다. 그냥 둬도 상관 없다. 위에서 bCanEverTick를 false로 했디 깨문이다.    */
+}     위에서 bCanEverTick를 false로 했디 깨문이다.    */
 
+void UABCharacterStatComponent::SetDamage(float NewDamage)
+{
+	ABCHECK(nullptr != CurrentStatData);
+	SetHP(FMath::Clamp<float>(CurrentHP - NewDamage, 0.0f, CurrentStatData->MaxHP));
+
+	/*   CurrentHP = FMath::Clamp<float>(CurrentHP - NewDamage, 0.0f, CurrentStatData->MaxHP);
+	if (CurrentHP <= 0.0f)
+	{
+		OnHPIsZero.Broadcast();
+	}   386페이지에 이 라인들 없어서 일단 주석처리했습니다.  */
+}
+
+void UABCharacterStatComponent::SetHP(float NewHP)
+{
+	CurrentHP = NewHP;
+	OnHPChanged.Broadcast();
+	if (CurrentHP < KINDA_SMALL_NUMBER)
+	{
+		CurrentHP = 0.0f;
+		OnHPIsZero.Broadcast();
+	}
+}
+
+float UABCharacterStatComponent::GetAttack()
+{
+	ABCHECK(nullptr != CurrentStatData, 0.0f);
+	return CurrentStatData->Attack;
+}
+
+float UABCharacterStatComponent::GetHPRatio()
+{
+	ABCHECK(nullptr != CurrentStatData, 0.0f);
+
+	return (CurrentStatData->MaxHP < KINDA_SMALL_NUMBER) ? 0.0f : (CurrentHP / CurrentStatData->MaxHP);
+}

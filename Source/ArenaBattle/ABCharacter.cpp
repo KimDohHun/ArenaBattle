@@ -6,6 +6,8 @@
 #include "ABWeapon.h"  
 #include "ABCharacterStatComponent.h"
 #include "DrawDebugHelpers.h"
+#include "Components/WidgetComponent.h"
+#include "ABCharacterWidget.h"
 
 // Sets default values
 AABCharacter::AABCharacter()
@@ -15,9 +17,11 @@ AABCharacter::AABCharacter()
     SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SPRINGARM"));
     Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("CAMERA"));
     CharacterStat = CreateDefaultSubobject<UABCharacterStatComponent>(TEXT("CHARACTERSTAT"));  //CharacterStatComponent가 생성되는 시점은 AABCharacter 생성자가 호출되는 시점ㅇ.다
+    HPBarWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("HPBARWIDGET"));
 
     SpringArm->SetupAttachment(GetCapsuleComponent());
     Camera->SetupAttachment(SpringArm);
+    HPBarWidget->SetupAttachment(GetMesh());
 
     GetMesh()->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -88.0f), FRotator(0.0f, -90.0f, 0.0f));
     SpringArm->TargetArmLength = 400.0f;
@@ -51,6 +55,17 @@ AABCharacter::AABCharacter()
 
     AttackRange = 200.0f;
     AttackRadius = 50.0f;
+
+    //381페이지 라인. 여기에 작성하는 게 확실하지 않습니다. 
+    HPBarWidget->SetRelativeLocation(FVector(0.0f, 0.0f, 180.0f));
+    HPBarWidget->SetWidgetSpace(EWidgetSpace::Screen);
+    static ConstructorHelpers::FClassFinder<UUserWidget> UI_HUD(TEXT("/Game/Book/UI/UI_HPBar.UI_HPBar_C"));
+    if (UI_HUD.Succeeded())
+    {
+        HPBarWidget->SetWidgetClass(UI_HUD.Class);
+        HPBarWidget->SetDrawSize(FVector2D(150.0f, 50.0f));
+    }
+
 }
 
 void AABCharacter::PostInitializeComponents()
@@ -74,6 +89,39 @@ void AABCharacter::PostInitializeComponents()
         }
     });
     ABAnim->OnAttackHitCheck.AddUObject(this, &AABCharacter::AttackCheck); 
+
+    CharacterStat->OnHPIsZero.AddLambda([this]() -> void {
+
+        ABLOG(Warning, TEXT("OnHPIsZero"));
+        ABAnim->SetDeadAnim();
+        SetActorEnableCollision(false);
+
+        });
+
+    auto CharacterWidget = Cast<UABCharacterWidget>(HPBarWidget->GetUserWidgetObject());
+    if (nullptr != CharacterWidget)
+    {
+        CharacterWidget->BindCharacterStat(CharacterStat);
+    }
+
+}
+
+//370페이지 라인입니다. 원래 357라인에 있던 것을 이 위치로 옮겼습니다. 
+float AABCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+    float FinalDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+    ABLOG(Warning, TEXT("Actor : %s took Damage : %f"), *GetName(), FinalDamage);
+
+    CharacterStat->SetDamage(FinalDamage);
+    return FinalDamage;    //이 라인이 원래 여기에 없었는데 370페이지에 적혀 있어서 새로 작성했습니다. 102라인과 겹쳐서 문제가 되지는 않을까요??
+
+    if (FinalDamage > 0.0f)
+    {
+        ABAnim->SetDeadAnim();
+        SetActorEnableCollision(false);
+    }
+
+    return FinalDamage;
 }
 
 // Called when the game starts or when spawned
@@ -81,6 +129,14 @@ void AABCharacter::PostInitializeComponents()
 void AABCharacter::BeginPlay()
 {
     Super::BeginPlay();
+
+    //390페이지의 버전 관련 코드입니다. 
+
+    auto CharacterWidget = Cast<UABCharacterWidget>(HPBarWidget->GetUserWidgetObject());
+    if (nullptr != CharacterWidget)
+    {
+        CharacterWidget->BindCharacterStat(CharacterStat);
+    }
 }
 
 bool AABCharacter::CanSetWeapon()
@@ -324,22 +380,8 @@ void AABCharacter::AttackCheck()
             ABLOG(Warning, TEXT("Hit Actor Name : %s"), *HitResult.Actor->GetName());
 
             FDamageEvent DamageEvent;
-            HitResult.Actor->TakeDamage(50.0f, DamageEvent, GetController(), this);
+            HitResult.Actor->TakeDamage(CharacterStat->GetAttack(), DamageEvent, GetController(), this);
         }
     }
 }
 
-//306페이지 라인 작성 위치가 확실하지 않습니다. 
-float AABCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController * EventInstigator, AActor * DamageCauser)
-{
-    float FinalDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-    ABLOG(Warning, TEXT("Actor : %s took Damage : %f"), *GetName(), FinalDamage);
-
-    if (FinalDamage > 0.0f)
-    {
-        ABAnim->SetDeadAnim();
-        SetActorEnableCollision(false);
-    }
-
-    return FinalDamage;
-}
