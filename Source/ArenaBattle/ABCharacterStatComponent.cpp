@@ -75,7 +75,7 @@ void UABCharacterStatComponent::SetHP(float NewHP)  //65라인의 셋HP가 여기에서 �
 {
 	CurrentHP = NewHP;
 	OnHPChanged.Broadcast();  //셋Hp가 불려졌단 건 Hp에 변화가 있었단 것이고
-	if (CurrentHP < KINDA_SMALL_NUMBER)   //이때 Hp변화가 있어서 딜리게이트가 호출됨. 현재 Hp가 010001보다 작아지면(0이 안 될수도 있으니까. 플롯은)
+	if (CurrentHP < KINDA_SMALL_NUMBER)   //이때 Hp변화가 있어서 딜리게이트가 호출됨. 현재 Hp가 010001보다 작아지면(0이 안 될수도 있으니까. 플롯은). 여기서 실제로 hp세팅한다. 
 	{
 		CurrentHP = 0.0f;
 		OnHPIsZero.Broadcast();   //OnHPIsZero에 등록된 함수들을 Broadcast한다. 

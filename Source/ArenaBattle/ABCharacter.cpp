@@ -8,6 +8,7 @@
 #include "DrawDebugHelpers.h"
 #include "Components/WidgetComponent.h"
 #include "ABCharacterWidget.h"
+#include "ABAIController.h"
 
 // Sets default values
 AABCharacter::AABCharacter()
@@ -65,6 +66,8 @@ AABCharacter::AABCharacter()
         HPBarWidget->SetWidgetClass(UI_HUD.Class);   //HP바도 UIHUD를 하나 가지고 있다. UIHud가 곧 위젯이다. 이때에는 상속이 아니라 그냥 가지고 있는 거다. 위젯 컴포넌트는 상속 관계가 아니라 위젯을 그냥 가지고 있다. 셋위젯 클래스를 하는 이유는 ...  HPBar가 UI로 변하는 게 아니라 HP바가 위젯 안에 변수로 들어감. 
         HPBarWidget->SetDrawSize(FVector2D(150.0f, 50.0f));
     }
+    AIControllerClass = AABAIController::StaticClass();
+    AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
 }
 
@@ -77,7 +80,7 @@ void AABCharacter::PostInitializeComponents()
 
     ABAnim->OnMontageEnded.AddDynamic(this, &AABCharacter::OnAttackMontageEnded);
 
-    ABAnim->OnNextAttackCheck.AddLambda([this]()
+    ABAnim->OnNextAttackCheck.AddLambda([this]() -> void 
         {
         ABLOG(Warning, TEXT("OnNextAttackCheck"));
         CanNextCombo = false;
@@ -90,12 +93,11 @@ void AABCharacter::PostInitializeComponents()
     });
     ABAnim->OnAttackHitCheck.AddUObject(this, &AABCharacter::AttackCheck); 
 
-    CharacterStat->OnHPIsZero.AddLambda([this]() -> void {
-
+    CharacterStat->OnHPIsZero.AddLambda([this]() -> void 
+        {
         ABLOG(Warning, TEXT("OnHPIsZero"));
         ABAnim->SetDeadAnim();
         SetActorEnableCollision(false);
-
         });
 
 }
@@ -106,7 +108,7 @@ float AABCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
     float FinalDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
     ABLOG(Warning, TEXT("Actor : %s took Damage : %f"), *GetName(), FinalDamage);
 
-    CharacterStat->SetDamage(FinalDamage);
+    CharacterStat->SetDamage(FinalDamage);  //테이크데미지
     return FinalDamage;    //이 라인이 원래 여기에 없었는데 370페이지에 적혀 있어서 새로 작성했습니다. 102라인과 겹쳐서 문제가 되지는 않을까요??
 
 }
@@ -218,8 +220,6 @@ void AABCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
     PlayerInputComponent->BindAxis(TEXT("LeftRight"), this, &AABCharacter::LeftRight);
     PlayerInputComponent->BindAxis(TEXT("LookUp"), this, &AABCharacter::LookUp);
     PlayerInputComponent->BindAxis(TEXT("Turn"), this, &AABCharacter::Turn);
-
-
 }
 
 void AABCharacter::UpDown(float NewAxisValue)
@@ -308,7 +308,7 @@ void AABCharacter::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted
 {
     ABCHECK(IsAttacking);
     ABCHECK(CurrentCombo > 0);
-    IsAttacking = false;
+    IsAttacking = false;  //  IsAttacking = false로 할지, false=IsAttacking 으로할지정해서 수정하기. 
     AttackEndComboState();
 }
 
@@ -368,7 +368,7 @@ void AABCharacter::AttackCheck()
 
             FDamageEvent DamageEvent;
             HitResult.Actor->TakeDamage(CharacterStat->GetAttack(), DamageEvent, GetController(), this);  //맞은애의 테이크대미지를 호출, 맞은대미지를 TakeDamage의 첫번째 인자로 호출. 
-        }   //여기서 액터로 돼 있지만 사실 실형식은 A캐릭터
+        }   //여기서 액터로 돼 있지만 사실 실형식은 A캐릭터, 여기서 테이크대미지 호출. 
     }
 }
 
