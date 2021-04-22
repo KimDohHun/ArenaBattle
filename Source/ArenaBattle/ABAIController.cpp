@@ -24,15 +24,15 @@ AABAIController::AABAIController()
 	}
 }
 
-void AABAIController::OnPossess(APawn* InPawn)  //403페이지에 다라 On 첨가
+void AABAIController::OnPossess(APawn* InPawn)  //403페이지에 다라 On 첨가, OnPossess는 폰이 컨트롤러에 빙의할 때 호룿된다. 즉 사용자가 조종을 시작할 때. 
 {
-	Super::OnPossess(InPawn);
-	if (UseBlackboard(BBAsset, Blackboard))
+	Super::OnPossess(InPawn);  //이후 부모의 OnPossess를 불러오고 인자로는 컨트롤러가 빙의한 폰이 들어간다. 
+	if (UseBlackboard(BBAsset, Blackboard))  //이게 성공하면 14라인의 BBAsset을 불러온다. 이때 블랙보드값이 BBAsset에 들어간다. 
 	{
-		Blackboard->SetValueAsVector(HomePosKey, InPawn->GetActorLocation());
-		if (!RunBehaviorTree(BTAsset))
+		Blackboard->SetValueAsVector(HomePosKey, InPawn->GetActorLocation());  //폰의 현재 위치를 HomePosKey에 넣는다. 
+		if (!RunBehaviorTree(BTAsset))   //20라인의 BTAsset을 불러온다. 
 		{
-			ABLOG(Error, TEXT("AIController couldn't run behavior tree!"));
+			ABLOG(Error, TEXT("AIController couldn't run behavior tree!"));   //조건문에 실패하면 에러 메시지를 나타낸다. 
 		}
 	}
 }

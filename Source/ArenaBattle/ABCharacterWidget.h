@@ -24,6 +24,6 @@ protected:
 private:
 	TWeakObjectPtr<class UABCharacterStatComponent> CurrentCharacterStat;
 
-	UPROPERTY()
-	class UProgressBar* HPProgressBar;
+	UPROPERTY(meta = (BindWidget))  //BindWidget을 사용할 때에는 C++과 블루프린트의 변수 이름이 같아야 한다. 그래서 여기서는 PB_HPBar로 모두 바꿨다. 이 부분 이게 더 쉽게 하는 방법이라서 책이랑 다름.
+	class UProgressBar* PB_HPBar;
 };

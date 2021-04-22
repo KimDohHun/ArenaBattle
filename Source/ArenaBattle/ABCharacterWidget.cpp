@@ -25,8 +25,7 @@ void UABCharacterWidget::BindCharacterStat(UABCharacterStatComponent* NewCharact
 void UABCharacterWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
-	HPProgressBar = Cast<UProgressBar>(GetWidgetFromName(TEXT("PB_HPBar")));
-	ABCHECK(nullptr != HPProgressBar);
+	ABCHECK(nullptr != PB_HPBar);
 	UpdateHPWidget();
 }
 
@@ -34,9 +33,9 @@ void UABCharacterWidget::UpdateHPWidget()
 {
 	if (CurrentCharacterStat.IsValid())
 	{
-		if (nullptr != HPProgressBar)
+		if (nullptr != PB_HPBar)
 		{
-			HPProgressBar->SetPercent(CurrentCharacterStat->GetHPRatio());
+			PB_HPBar->SetPercent(CurrentCharacterStat->GetHPRatio());
 		}
 	}
 }
