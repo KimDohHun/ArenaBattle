@@ -382,12 +382,12 @@ void AABCharacter::PossessedBy(AController* NewController)  //432페이지 작성 위�
 {
     Super::PossessedBy(NewController);
 
-    if (IsPlayerControlled())
+    if (IsPlayerControlled())  //플레이어에 의해서 컨트롤되고 있다면
     {
-        SetControlMode(EControlMode::DIABLO);
-        GetCharacterMovement()->MaxWalkSpeed = 600.0f;
+        SetControlMode(EControlMode::DIABLO);  //컨트롤모드를 디아블로로 바꾸고
+        GetCharacterMovement()->MaxWalkSpeed = 600.0f;  //최대 속력은 600
     }
-    else
+    else   //플레이어에 의해서 컨트롤되고 있지 않다면, 즉 AI라면.
     {
         SetControlMode(EControlMode::NPC);
         GetCharacterMovement()->MaxWalkSpeed = 300.0f;
