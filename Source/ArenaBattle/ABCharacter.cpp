@@ -177,6 +177,12 @@ void AABCharacter::SetControlMode(EControlMode NewControlMode)
         GetCharacterMovement()->bUseControllerDesiredRotation = true;
         GetCharacterMovement()->RotationRate = FRotator(0.0f, 720.0f, 0.0f);
         break;
+    case EControlMode::NPC:
+        bUseControllerRotationYaw = false;
+        GetCharacterMovement()->bUseControllerDesiredRotation = false;
+        GetCharacterMovement()->bOrientRotationToMovement = true;
+        GetCharacterMovement()->RotationRate = FRotator(0.0f, 480.0f, 0.0f);
+        break;
     }
 }
 
@@ -372,3 +378,18 @@ void AABCharacter::AttackCheck()
     }
 }
 
+void AABCharacter::PossessedBy(AController* NewController)  //432페이지 작성 위치가 맞는지 확실하지 않습니다. 
+{
+    Super::PossessedBy(NewController);
+
+    if (IsPlayerControlled())
+    {
+        SetControlMode(EControlMode::DIABLO);
+        GetCharacterMovement()->MaxWalkSpeed = 600.0f;
+    }
+    else
+    {
+        SetControlMode(EControlMode::NPC);
+        GetCharacterMovement()->MaxWalkSpeed = 300.0f;
+    }
+}
