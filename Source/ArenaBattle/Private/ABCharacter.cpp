@@ -316,6 +316,7 @@ void AABCharacter::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted
     ABCHECK(CurrentCombo > 0);
     IsAttacking = false;  //  IsAttacking = false로 할지, false=IsAttacking 으로할지정해서 수정하기. 
     AttackEndComboState();
+    OnAttackEnd.Broadcast();
 }
 
 void AABCharacter::AttackStartComboState()
