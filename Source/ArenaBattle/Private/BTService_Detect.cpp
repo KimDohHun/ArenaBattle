@@ -28,7 +28,7 @@ void UBTService_Detect::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeM
 	TArray<FOverlapResult> OverlapResults;  
 	//TArray<FOverlapResult> 이거 자체가 타입임. TArray는 FOverlapResult 자체를 담는 배열임.< > 이 꺽쇠가 템플릿이다. OverlapResults는 컨테이너
 	FCollisionQueryParams CollisionQueryParams(NAME_None, false, ControllingPawn);
-	bool bResult = World->OverlapMultiByChannel(    ////OverlapMultiByChannel에 값이 담길 수 있는 이유는 레퍼런스 &, Outoverlaps 레퍼런스를 사용하고 있기 때문. OverlapMultiByChannel은 앞에서 공격 부분을 할 때 sweep 간련 함수로 사용했음. 이건 31행에서 여러 개를 받겠다는 의미에서 multi를 붙였음. 멀티이기때문에 Tarry로서 배열 컨테이너를 사용. 
+	bool bResult = World->OverlapMultiByChannel(    //OverlapMultiByChannel에 값이 담길 수 있는 이유는 레퍼런스 &, Outoverlaps 레퍼런스를 사용하고 있기 때문. OverlapMultiByChannel은 앞에서 공격 부분을 할 때 sweep 간련 함수로 사용했음. 이건 31행에서 여러 개를 받겠다는 의미에서 multi를 붙였음. 멀티이기때문에 Tarry로서 배열 컨테이너를 사용. 
 		OverlapResults,
 		Center,
 		FQuat::Identity,
