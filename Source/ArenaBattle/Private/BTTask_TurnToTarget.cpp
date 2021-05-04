@@ -32,7 +32,7 @@ EBTNodeResult::Type UBTTask_TurnToTarget::ExecuteTask(UBehaviorTreeComponent& Ow
 	//MakeFromX의 인자를 보면 Xais 이고 이는 LookVector를 x축으로 삼겠단 것. 그러면 나머지 y, z도 위치가 달라진다. MakeFrom*는 직교하는 단위벡터를 반환. 
 	ABCharacter->SetActorRotation(FMath::RInterpTo(ABCharacter->GetActorRotation(), TargetRot, GetWorld()->GetDeltaSeconds(), 2.0f));  //RInterpTo보관한다. RInterpTo는 현재위치에서 타깃쪽으로 방향을 반환. 여기에 인자로 속도를 RInterpTospeed를 받음. 
 	//이때 단위 벡터를 사용하는 까닭은 단위벡터는 크기가 없고 방향만 있기 때문. 즉 크기가 있다면 그 방향으로 '이동'을 하는데 이건 이동이 아니라 플레이어가 있는 쪽으로 '회전해서 바라보기'만 하면 되기 때문.
-	//Inv는 뒤집는 단 것으로서 invsqrt는 그 뒤에 오는 숫자를 분모로 만든단 것이다. 
+	//Inv는 뒤집는 단 것으로서 invsqrt는 그 뒤에 오는 숫자를 분모로 만든단 것이다. GetActorRotation는 회전값이다. 회전 속도가 아니다. 
 	return EBTNodeResult::Succeeded;
 
 }

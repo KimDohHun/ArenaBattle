@@ -9,6 +9,8 @@
 #include "Components/WidgetComponent.h"
 #include "ABCharacterWidget.h"
 #include "ABAIController.h"
+#include "ABCharacterSetting.h"
+#include "ABGameInstance.h"
 
 // Sets default values
 AABCharacter::AABCharacter()
@@ -69,6 +71,14 @@ AABCharacter::AABCharacter()
     AIControllerClass = AABAIController::StaticClass();
     AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
+    auto DefaultSetting = GetDefault<UABCharacterSetting>();
+    if (DefaultSetting->CharacterAssets.Num() > 0)
+    {
+        for (auto CharacterAsset : DefaultSetting->CharacterAssets)
+        {
+            ABLOG(Warning, TEXT("Character Asset : %s"), *CharacterAsset.ToString());
+        }
+    }
 }
 
 void AABCharacter::PostInitializeComponents()
@@ -78,8 +88,8 @@ void AABCharacter::PostInitializeComponents()
     ABAnim = Cast<UABAnimInstance>(GetMesh()->GetAnimInstance());
     ABCHECK(nullptr != ABAnim);
 
-    ABAnim->OnMontageEnded.AddDynamic(this, &AABCharacter::OnAttackMontageEnded);
-
+    ABAnim->OnMontageEnded.AddDynamic(this, &AABCharacter::OnAttackMontageEnded);  //OnMontageEnded에 OnAttackMontageEnded를 바인딩. OnMontageEnded가 호출되면 여기에 바인딩된 함수들도 함께 호출됨. 
+    //OnAttackMontageEnded여기에 바인딩된 함수가 뭐냐하면 313라인들, OnAttackMontageEnded는 공격이 끝나면 호출됨. 
     ABAnim->OnNextAttackCheck.AddLambda([this]() -> void 
         {
         ABLOG(Warning, TEXT("OnNextAttackCheck"));
@@ -119,8 +129,20 @@ void AABCharacter::BeginPlay()
 {
     Super::BeginPlay();
 
-    //390페이지의 버전 관련 코드입니다. 
+    if (!IsPlayerControlled())
+    {
+        auto DafaultSetting = GetDefault<UABCharacterSetting>();
+        int32 RandIndex = FMath::RandRange(0, DafaultSetting->CharacterAssets.Num() - 1);
+        CharacterAssetToLoad = DafaultSetting->CharacterAssets[RandIndex];
 
+        auto ABGameInstance = Cast<UABGameInstance>(GetGameInstance());
+        if (nullptr != ABGameInstance)
+        {
+            AssetStreamingHandle = ABGameInstance->StreamableManager.RequestAsyncLoad(CharacterAssetToLoad, FStreamableDelegate::CreateUObject(this, &AABCharacter::OnAssetLoadCompleted));
+        }
+    }
+
+    //470페이지. 원래 이 코드가 있었습니다. 이 코드를 지우고 470페이지를 작성하니 위젯이 나타나지 않아서 다시 작성했습니다. 
     auto CharacterWidget = Cast<UABCharacterWidget>(HPBarWidget->GetUserWidgetObject());
     if (nullptr != CharacterWidget)
     {
@@ -299,7 +321,7 @@ void AABCharacter::Attack()
             IsComboInputOn = true;
         }
     }
-    else
+    else  //여기가 처음 공격할 때 호출되는 함수. 왜냐하면 IsAttacking은 공격 중에 호출되는 함수니까. 
     {
         ABCHECK(CurrentCombo == 0);
         AttackStartComboState();
@@ -310,7 +332,7 @@ void AABCharacter::Attack()
     
 }
 
-void AABCharacter::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+void AABCharacter::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)   //81번 라인에 바인딩된 함수들. 
 {
     ABCHECK(IsAttacking);
     ABCHECK(CurrentCombo > 0);
@@ -392,5 +414,15 @@ void AABCharacter::PossessedBy(AController* NewController)  //432페이지 작성 위�
     {
         SetControlMode(EControlMode::NPC);
         GetCharacterMovement()->MaxWalkSpeed = 300.0f;
+    }
+}
+
+void AABCharacter::OnAssetLoadCompleted()
+{
+    USkeletalMesh* AssetLoaded = Cast<USkeletalMesh>(AssetStreamingHandle->GetLoadedAsset());
+    AssetStreamingHandle.Reset();
+    if (nullptr != AssetLoaded)
+    {
+        GetMesh()->SetSkeletalMesh(AssetLoaded);
     }
 }

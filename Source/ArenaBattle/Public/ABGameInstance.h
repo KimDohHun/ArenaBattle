@@ -5,6 +5,7 @@
 #include "ArenaBattle.h"
 #include "Engine/DataTable.h"
 #include "Engine/GameInstance.h"
+#include "Engine/StreamableManager.h"
 #include "ABGameInstance.generated.h"
 
 USTRUCT(BlueprintType)
@@ -44,6 +45,8 @@ public:
 
 	virtual void Init() override;
 	FABCharacterData* GetABCharacterData(int32 Level);  //ABCharacterTable이 프라이빗으로 선언돼 있어서 Get함수를 사용해서 가져옴. 이때 인자로 레벨을 주면 18행 부터 21행이 채워짐.
+
+	FStreamableManager StreamableManager;
 
 private:
 	UPROPERTY()

@@ -22,19 +22,19 @@ EBTNodeResult::Type UBTTask_Attack::ExecuteTask(UBehaviorTreeComponent & OwnerCo
 
 	ABCharacter->Attack();
 	IsAttacking = true;
-	ABCharacter->OnAttackEnd.AddLambda([this]() -> void {
-		IsAttacking = false;
+	ABCharacter->OnAttackEnd.AddLambda([this]() -> void {  //람다함수 바인딩   이게 이 위에허 바인딩한 함수들
+		IsAttacking = false;  //IsAttacking이 false이면 한 번의 공격을 끝낸다. 여기서 
 	});
 
-	return EBTNodeResult::InProgress;
+	return EBTNodeResult::InProgress;  //InProgress는 succeeded도 아니고 false도 아니다. InProgress는 한 번 실핼하고 있는 중임을 나타낸다. 그렇지 않으면 atttack는 계속 공격 시도만 반복할 것이다. 
 }
 
-void UBTTask_Attack::TickTask(UBehaviorTreeComponent & OwnerComp, uint8 * NodeMemory, float DeltaSeconds)
+void UBTTask_Attack::TickTask(UBehaviorTreeComponent & OwnerComp, uint8 * NodeMemory, float DeltaSeconds)  //TickTask
 {
 	Super::TickTask(OwnerComp, NodeMemory, DeltaSeconds);
-	if (!IsAttacking)
+	if (!IsAttacking)  //공격이 아니라면 (bool형 반환)
 	{
-		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
+		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);  //공격이 아닌 게 성공이면 , 함수를 끝낸다. 
 	}
 }
 

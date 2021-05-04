@@ -69,7 +69,7 @@ public:
 	class UWidgetComponent* HPBarWidget;
 
 	void Attack();
-	FOnAttackEndDelegate OnAttackEnd;
+	FOnAttackEndDelegate OnAttackEnd;  //여기서 OnAttackEnd호출.
 
 private:
 	void UpDown(float NewAxisValue);
@@ -86,6 +86,7 @@ private:
 	void AttackStartComboState();
 	void AttackEndComboState();
 	void AttackCheck();
+	void OnAssetLoadCompleted();
 
 private:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Attack", Meta = (AllowPrivateAccess = true))
@@ -111,6 +112,9 @@ private:
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
 	float AttackRadius;
+
+	FSoftObjectPath CharacterAssetToLoad = FSoftObjectPath(nullptr);
+	TSharedPtr<struct FStreamableHandle> AssetStreamingHandle;
 };
 
 
