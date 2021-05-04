@@ -5,12 +5,13 @@
 #include "ABCharacterStatComponent.h"
 #include "Components/ProgressBar.h"
 
-void UABCharacterWidget::BindCharacterStat(UABCharacterStatComponent* NewCharacterStat)  //캐릭터의 hp비율을 인자로 받아야 위젯으로 출력이 가능하다. 
+void UABCharacterWidget::BindCharacterStat(UABCharacterStatComponent* NewCharacterStat)  
+//캐릭터의 hp비율을 인자로 받아야 위젯으로 출력이 가능하다. 
 {
 	ABCHECK(nullptr != NewCharacterStat);
 
 	CurrentCharacterStat = NewCharacterStat;
-	NewCharacterStat->OnHPChanged.AddUObject(this, &UABCharacterWidget::UpdateHPWidget);
+	NewCharacterStat->OnHPChanged.AddUObject(this, &UABCharacterWidget::UpdateHPWidget);  //
 
 	/*NewCharacterStat->OnHPChanged.AddLambda( [this]() -> void {
 

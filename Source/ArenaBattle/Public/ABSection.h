@@ -7,7 +7,7 @@
 #include "ABSection.generated.h"
 
 UCLASS()
-class ARENABATTLE_API AABSection : public AActor
+class ARENABATTLE_API AABSection : public AActor  //애터를 상속하는 ABSection 생성자
 {
 	GENERATED_BODY()
 	
@@ -21,9 +21,9 @@ protected:
 
 private:	
 	UPROPERTY(VisibleAnywhere, Category = Mesh, Meta = (AllowPrivateAccess = true))
-	TArray<UStaticMeshComponent*> GateMeshes;
+	TArray<UStaticMeshComponent*> GateMeshes;  //4개라서 어레이. 멤버함수(?)
 
 	UPROPERTY(VisibleAnywhere, Category = Mesh, Meta = (AllowPrivateAccess = true))
-	UStaticMeshComponent* Mesh;
+	UStaticMeshComponent* Mesh;  // 이때 메쉬는 전체 맴에 대한 메쉬.
 
 };

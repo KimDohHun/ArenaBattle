@@ -50,6 +50,8 @@ public:
 	bool CanSetWeapon();
 	void SetWeapon(class AABWeapon* NewWeapon);
 
+	FName GetCurrentStateNodeName() const;
+
 	UPROPERTY(VisibleAnywhere, Category = "Weapon")
 	class AABWeapon* CurrentWeapon;
 
@@ -76,6 +78,7 @@ private:
 	void LeftRight(float NewAxisValue);
 	void LookUp(float NewAxisValue);
 	void Turn(float NewAxisValue);
+	virtual void Jump() override;
 	
 	void ViewChange();
 	//void Attack();   442페이지에서 Attack 함수 권한을 public으로 바꾸라고 돼있어서 주석처리했는데 맞는지요?

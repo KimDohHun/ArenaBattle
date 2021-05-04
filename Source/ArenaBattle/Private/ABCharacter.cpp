@@ -129,16 +129,22 @@ void AABCharacter::BeginPlay()
 {
     Super::BeginPlay();
 
-    if (!IsPlayerControlled())
+    if (!IsPlayerControlled())  //만약 AI라면 즉 플레이어 컨트롤러가 아니라면
     {
-        auto DafaultSetting = GetDefault<UABCharacterSetting>();
-        int32 RandIndex = FMath::RandRange(0, DafaultSetting->CharacterAssets.Num() - 1);
-        CharacterAssetToLoad = DafaultSetting->CharacterAssets[RandIndex];
+        auto DafaultSetting = GetDefault<UABCharacterSetting>();  //
+        int32 RandIndex = FMath::RandRange(0, DafaultSetting->CharacterAssets.Num() - 1);  //RandRange는 랜덤한 범위를 의미. CharacterAssets이 5개라고 한다면 이때 -1을 해주는 까닭은 배열은 0부터 시작하기 때문. 
+        // 여기서 랜덤한 값을 가지므로 메쉬의 값들이 랜덤하게 달라진다. 
+        CharacterAssetToLoad = DafaultSetting->CharacterAssets[RandIndex];  //RandIndex 여기서 인덱스를 받는데 인덱스 5가 들어오면 0부터 시작하므로 out of range가 나타난다. 
 
         auto ABGameInstance = Cast<UABGameInstance>(GetGameInstance());
-        if (nullptr != ABGameInstance)
+        if (nullptr != ABGameInstance)  //
         {
             AssetStreamingHandle = ABGameInstance->StreamableManager.RequestAsyncLoad(CharacterAssetToLoad, FStreamableDelegate::CreateUObject(this, &AABCharacter::OnAssetLoadCompleted));
+            
+        //RequestAsyncLoad이 말은 비동기. 동기는 순서대로 실행하는 것이고 비동기는 순서에 상관없이 일단 실행하고 보는 것. 
+        //StreamableManager를 통해서 RequestAsyncLoad 함수를 실행한다. 이때 인자를 보면 FSoftObjectPath인데 이것은 경로를 넣으라는 뜻. 
+        //Fstreamabledelegate는 ㄴㅅㅁ샻 함수로서 전역함수.  
+        //RequestAsyncLoad 이게 로드되면 OnAssetLoadCompleted 이 함수가 실행된다.
         }
     }
 
@@ -146,7 +152,7 @@ void AABCharacter::BeginPlay()
     auto CharacterWidget = Cast<UABCharacterWidget>(HPBarWidget->GetUserWidgetObject());
     if (nullptr != CharacterWidget)
     {
-        CharacterWidget->BindCharacterStat(CharacterStat);
+        CharacterWidget->BindCharacterStat(CharacterStat);  //이게 있어야 한다. CharacterStat을 BindCharacterStat에 바인드 해준다. 
     }
 }
 
@@ -164,6 +170,11 @@ void AABCharacter::SetWeapon(AABWeapon* NewWeapon)
     NewWeapon->SetOwner(this);
     CurrentWeapon = NewWeapon;
     
+}
+
+FName AABCharacter::GetCurrentStateNodeName() const
+{
+    return ABAnim->GetCurrentStateName(ABAnim->GetStateMachineIndex(TEXT("BaseAction")));
 }
 
 void AABCharacter::SetControlMode(EControlMode NewControlMode)
@@ -252,6 +263,11 @@ void AABCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 
 void AABCharacter::UpDown(float NewAxisValue)
 {
+    if (IsAttacking==true)
+    {
+        return;
+    }
+
     switch (CurrentControlMode)
     {
     case EControlMode::GTA:
@@ -265,6 +281,11 @@ void AABCharacter::UpDown(float NewAxisValue)
 
 void AABCharacter::LeftRight(float NewAxisValue)
 {
+    if (IsAttacking == true)
+    {
+        return;
+    }
+
     switch (CurrentControlMode)
     {
     case EControlMode::GTA:
@@ -296,6 +317,17 @@ void AABCharacter::Turn(float NewAxisValue)
     }
 }
 
+void AABCharacter::Jump()
+{
+    if (IsAttacking == true)
+    {
+        return;
+    }
+
+    bPressedJump = true;
+    JumpKeyHoldTime = 0.0f;
+}
+
 void AABCharacter::ViewChange()
 {
     switch (CurrentControlMode)
@@ -313,6 +345,11 @@ void AABCharacter::ViewChange()
 
 void AABCharacter::Attack()
 {
+    if (GetCurrentStateNodeName() != TEXT("Ground"))
+    {
+        return;
+    }
+
     if (IsAttacking) 
     {
         ABCHECK(FMath::IsWithinInclusive<int32>(CurrentCombo, 1, MaxCombo));
@@ -421,8 +458,8 @@ void AABCharacter::OnAssetLoadCompleted()
 {
     USkeletalMesh* AssetLoaded = Cast<USkeletalMesh>(AssetStreamingHandle->GetLoadedAsset());
     AssetStreamingHandle.Reset();
-    if (nullptr != AssetLoaded)
+    if (nullptr != AssetLoaded)  //널포인터가 아니라면, 즉 주소가 없는게 아니라면.
     {
-        GetMesh()->SetSkeletalMesh(AssetLoaded);
+        GetMesh()->SetSkeletalMesh(AssetLoaded);  //SetSkeletalMesh에 AssetLoaded 에셋을 로드해서 캐릭터가 등장할 때마다 메쉬가 달라진다. 
     }
 }

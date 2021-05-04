@@ -18,5 +18,5 @@ public:
 	UABCharacterSetting();
 
 	UPROPERTY(config)
-		TArray<FSoftObjectPath> CharacterAssets;
+		TArray<FSoftObjectPath> CharacterAssets;  //여기서 ABCharacter.cpp로 간다. 이 라인은 
 };
