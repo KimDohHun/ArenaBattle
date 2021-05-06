@@ -174,7 +174,7 @@ void AABCharacter::SetWeapon(AABWeapon* NewWeapon)
 
 FName AABCharacter::GetCurrentStateNodeName() const
 {
-    return ABAnim->GetCurrentStateName(ABAnim->GetStateMachineIndex(TEXT("BaseAction")));
+    return ABAnim->GetCurrentStateName(ABAnim->GetStateMachineIndex(TEXT("BaseAction")));  //이 부분은 수업 중에 그라운드에 있을 때, 점프할 때, 좌우로 움직일 때 공격을 하지 못하도록 수정한 코드.
 }
 
 void AABCharacter::SetControlMode(EControlMode NewControlMode)
@@ -345,9 +345,9 @@ void AABCharacter::ViewChange()
 
 void AABCharacter::Attack()
 {
-    if (GetCurrentStateNodeName() != TEXT("Ground"))
+    if (GetCurrentStateNodeName() != TEXT("Ground"))  //GetCurrentStateNodeName는 현재 노드 네임을 불러온다. 이때에는 Ground만 아니면 나머지를 다 불러오므로 Jump를 의미한다. 
     {
-        return;
+        return;  //이 부분은 수업 중에 그라운드에 있을 때, 점프할 때, 좌우로 움직일 때 공격을 하지 못하도록 수정한 코드. 
     }
 
     if (IsAttacking) 
@@ -362,7 +362,7 @@ void AABCharacter::Attack()
     {
         ABCHECK(CurrentCombo == 0);
         AttackStartComboState();
-        ABAnim->PlayAttackMontage();
+        ABAnim->PlayAttackMontage();  //여기에서 PlayAttackMontage에 행동을 인자로 받아온다. 
         ABAnim->JumpToAttackMontageSection(CurrentCombo);
         IsAttacking = true;
     }

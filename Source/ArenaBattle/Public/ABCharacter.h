@@ -16,6 +16,8 @@ class ARENABATTLE_API AABCharacter : public ACharacter
 public:
 	// Sets default values for this character's properties
 	AABCharacter();
+	void SetCharacterState(ECharacterState NewState);
+	ECharacterState GetCharacterState( ) const;
 
 protected:
 	// Called when the game starts or when spawned
@@ -50,7 +52,7 @@ public:
 	bool CanSetWeapon();
 	void SetWeapon(class AABWeapon* NewWeapon);
 
-	FName GetCurrentStateNodeName() const;
+	FName GetCurrentStateNodeName() const;  //이 부분은 수업 중에 그라운드에 있을 때, 점프할 때, 좌우로 움직일 때 공격을 하지 못하도록 수정한 코드.
 
 	UPROPERTY(VisibleAnywhere, Category = "Weapon")
 	class AABWeapon* CurrentWeapon;
@@ -116,8 +118,22 @@ private:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
 	float AttackRadius;
 
+	int32 AssetIndex = 0;
+
 	FSoftObjectPath CharacterAssetToLoad = FSoftObjectPath(nullptr);
 	TSharedPtr<struct FStreamableHandle> AssetStreamingHandle;
+
+	UPROPERTY(Transient, VisiblaInstanceOnly, BlueprintReadOnly, Category = State, Meta = (AllowPrivateAccess = true))
+	ECharacterState CurrentState;
+
+	UPROPERTY(Transient, VisiblaInstanceOnly, BlueprintReadOnly, Category = State, Meta = (AllowPrivateAccess = true))
+	bool bIsPlayer;
+
+	UPROPERTY()
+	class AABAIController* ABAIController;
+
+	UPROPERTY()
+	class AABPlayerController* ABPlayerController;
 };
 
 

@@ -38,7 +38,7 @@ void UABAnimInstance::PlayAttackMontage()
 {
 	{
 		ABCHECK(!IsDead);
-		Montage_Play(AttackMontage, 1.0f);
+		Montage_Play(AttackMontage, 1.0f);  //AttackMontage를 받아온다. 
 	}
 }
 
