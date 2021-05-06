@@ -25,13 +25,14 @@ AABSection::AABSection()
 		ABLOG(Error, TEXT("Faled to load staticmesh asset. : %s"), *AssetPath);  //실패하면 로그 발생
 	}
 
-	Trigger = CreateDefaultSubobject<UBoxComponent>(TEXT("TRIGGER"));
-	Trigger->SetBoxExtent(FVector(775.0f, 775.0f, 300.0f));
+	Trigger = CreateDefaultSubobject<UBoxComponent>(TEXT("TRIGGER"));  //트리거만들고
+	Trigger->SetBoxExtent(FVector(775.0f, 775.0f, 300.0f));  
 	Trigger->SetupAttachment(RootComponent);
 	Trigger->SetRelativeLocation(FVector(0.0f, 0.0f, 250.0f));
 	Trigger->SetCollisionProfileName(TEXT("ABTrigger"));
 
-	Trigger->OnComponentBeginOverlap.AddDynamic(this, &AABSection::OnTriggerBeginOverlap);
+	Trigger->OnComponentBeginOverlap.AddDynamic(this, &AABSection::OnTriggerBeginOverlap);  
+	//딜리게이트가 미리 존재한다 여기에 OnTriggerBeginOverlap을 바인딩한다. 이러면 오버랩됬늘 때 호출된다. 
 
 	FString GateAssetPath = TEXT("/Game/Book/StaticMesh/SM_GATE.SM_GATE");  //메쉬 가져오기
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_GATE(*GateAssetPath);  //
@@ -67,36 +68,39 @@ AABSection::AABSection()
 	ItemBoxSpawnTime = 5.0f;
 }
 
-// Called when the game starts or when spawned
+// Called when the game starts or when spawned  게임이 시작되고 객체가 만들어졌을 때 비긴플레이가 호출된다. 
 void AABSection::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	SetState(bNoBattle ? ESectionState::COMPLETE : ESectionState::READY);
+	SetState(bNoBattle ? ESectionState::COMPLETE : ESectionState::READY);  
+	//SetState가 호출되는데 bNoBattle이 false로 되고 이는 스테이트가 ready 임을 의미한다. 그러면 82라인으로 넘어간다. 
 }
 
 void AABSection::SetState(ESectionState NewState)
 {
 	switch (NewState)
 	{
-	case ESectionState::READY:
+	case ESectionState::READY:  //ready가 하는 일 : AB트리거로 세팅,   NoCollision으로 세팅,  OperateGates(true)이렇게 해서 문을 열고 
+		//타이머로 NPC와 박스를 언제 어떻게 만들지 정한다. 
 	{
-		Trigger->SetCollisionProfileName(TEXT("ABTrigger"));
-		for (UBoxComponent* GateTrigger : GateTriggers)
+		Trigger->SetCollisionProfileName(TEXT("ABTrigger"));  //Trigger박스의 콜리전을 ABTrigger로 바꿈. 이 Trigger박스는 섹션 전체를 감싸서 충돌을 감지. 
+		//캐릭터만 감지하는 트리거.
+		for (UBoxComponent* GateTrigger : GateTriggers)  //GateTriggers는 배열이다. 4개니까. 이 부분을 범위기반 for문으로 한다. 
 		{
-			GateTrigger->SetCollisionProfileName(TEXT("NoCollision"));
+			GateTrigger->SetCollisionProfileName(TEXT("NoCollision"));  //GateTrigger르 NoCollision으로 한다. 
 		}
 
-		OperateGates(true);
+		OperateGates(true);  //문을 회전시킨 후
 
 		GetWorld()->GetTimerManager().SetTimer(SpawNPCTimerHandle, FTimerDelegate::CreateUObject(this, &AABSection::OnNPCSpawn), EnemySpawnTime, false);
-
+		//EnemySpawnTime은 위에서 2초로 정했다. false가 되면 FTimerDelegate로 바인딩 한 함수를 실행한다. 
 		GetWorld()->GetTimerManager().SetTimer(SpawnItemBoxTimerHandle, FTimerDelegate::CreateLambda([this]() -> void {
-			FVector2D RandXY = FMath::RandPointInCircle(600.0f);
+			FVector2D RandXY = FMath::RandPointInCircle(600.0f);  //RandPointInCircle 반지름 600범위에서 아무데나 찍는다. 
 			GetWorld()->SpawnActor<AABItemBox>(GetActorLocation() + FVector(RandXY, 30.0f), FRotator::ZeroRotator);
-
+			//GetActorLocation에서 
 			}), ItemBoxSpawnTime, false);
-
+		//ItemBoxSpawnTime(5초)에서 을 지정하고 0000을 false로 한다. 
 		break;
 	}
 
@@ -108,18 +112,19 @@ void AABSection::SetState(ESectionState NewState)
 			GateTrigger->SetCollisionProfileName(TEXT("NoCollision"));
 		}
 
-		OperateGates(false);
+		OperateGates(false);  //OperateGates(false) 회전이 없단 것. 문이 닫힌단 것. 
 		break;
 	}
 	case ESectionState::COMPLETE:
-	{
+	{  //NoBattle이 true면 다음 맵으로 갈 수 있고 false면 battle가 시작된다. 
 		Trigger->SetCollisionProfileName(TEXT("NoCollision"));
-		for (UBoxComponent* GateTrigger : GateTriggers)
+		for (UBoxComponent* GateTrigger : GateTriggers)  //GateTrigger는 네 개의 문에 대한 배열
 		{
-			GateTrigger->SetCollisionProfileName(TEXT("ABTrigger"));
+			GateTrigger->SetCollisionProfileName(TEXT("ABTrigger"));  //GateTrigger의 컴포넌트ㄴ를 ABTrigger(엔진에서 만듦)로 한다. 
+		
 		}
 
-		OperateGates(true);
+		OperateGates(true);  //문을 회전시킨다. 
 		break;
 	}
 	}
@@ -133,17 +138,17 @@ void AABSection::OnConstruction(const FTransform& Transform)
 	SetState(bNoBattle ? ESectionState::COMPLETE : ESectionState::READY);
 }
 
-void AABSection::OperateGates(bool bOpen)
+void AABSection::OperateGates(bool bOpen)  //bOpen에 트루가 들어오면, bOpen이 false면 닫혀 있다. 
 {
-	for (UStaticMeshComponent* Gate : GateMeshes)
+	for (UStaticMeshComponent* Gate : GateMeshes)  //4개의 게이트를 받는다. 
 	{
-		Gate->SetRelativeRotation(bOpen ? FRotator(0.0f, -90.0f, 0.0f) : FRotator::ZeroRotator);
-	}
+		Gate->SetRelativeRotation(bOpen ? FRotator(0.0f, -90.0f, 0.0f) : FRotator::ZeroRotator);  //삼항연산자. bOpen이 트루이면 FRotator만큼 회전한단 것. 
+	}  //트루면 메쉬를 yaw 축으로 회전시킨단 것. 
 }
 
 void AABSection::OnTriggerBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	if (CurrentState == ESectionState::READY)
+{   //OnTriggerBeginOverlap 섹션 트리거의 온비긴오버랩이란 딜리게이트가 있는데 거기에 바인딩 된 함수가 이거고 이게... 
+	if (CurrentState == ESectionState::READY)  //CurrentState  가 READY면 배틀BATTLE로 바꾼다. 
 	{
 		SetState(ESectionState::BATTLE);
 	}
@@ -152,17 +157,17 @@ void AABSection::OnTriggerBeginOverlap(UPrimitiveComponent* OverlappedComponent,
 void AABSection::OnGateTriggerBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	ABCHECK(OverlappedComponent->ComponentTags.Num() == 1);
-	FName ComponentTag = OverlappedComponent->ComponentTags[0];
+	FName ComponentTag = OverlappedComponent->ComponentTags[0];  //OverlappedComponent에서 ComponentTags가 나온다. 
 	FName SocketName = FName(*ComponentTag.ToString().Left(2));
-	if (!Mesh->DoesSocketExist(SocketName))
+	if (!Mesh->DoesSocketExist(SocketName))  //Mesh이거는 4개의 문에 대한 소켓이 존재한다. 이 소켓이 존재하냐... 
 		return;
 
-	FVector NewLocation = Mesh->GetSocketLocation(SocketName);
+	FVector NewLocation = Mesh->GetSocketLocation(SocketName);  //소켓 위치를 반환해서 NewLocation에 넣고
 
 	TArray<FOverlapResult> OverlapResults;
 	FCollisionQueryParams CollisionQueryParam(NAME_None, false, this);
 	FCollisionObjectQueryParams ObjectQueryParam(FCollisionObjectQueryParams::InitType::AllObjects);
-	bool bResult = GetWorld()->OverlapMultiByObjectType(
+	bool bResult = GetWorld()->OverlapMultiByObjectType(   //멀티.. 여러 개가 된단 것. 
 		OverlapResults,
 		NewLocation,
 		FQuat::Identity,
@@ -171,7 +176,7 @@ void AABSection::OnGateTriggerBeginOverlap(UPrimitiveComponent* OverlappedCompon
 		CollisionQueryParam
 	);
 
-	if (!bResult)
+	if (!bResult)   //
 	{
 		auto NewSection = GetWorld()->SpawnActor<AABSection>(NewLocation, FRotator::ZeroRotator);
 	}
