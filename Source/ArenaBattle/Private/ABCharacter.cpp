@@ -11,6 +11,8 @@
 #include "ABAIController.h"
 #include "ABCharacterSetting.h"
 #include "ABGameInstance.h"
+#include "ABPlayerController.h"
+#include "ABPlayerState.h"
 
 // Sets default values
 AABCharacter::AABCharacter()
@@ -79,6 +81,12 @@ AABCharacter::AABCharacter()
             ABLOG(Warning, TEXT("Character Asset : %s"), *CharacterAsset.ToString());
         }
     }
+    AssetIndex = 4;
+
+    SetActorHiddenInGame(true);
+    HPBarWidget->SetHiddenInGame(true);
+    bCanBeDamaged = false;
+    DeadTimer = 5.0f;
 }
 
 void AABCharacter::PostInitializeComponents()
@@ -135,6 +143,36 @@ void AABCharacter::BeginPlay()
 {
     Super::BeginPlay();
 
+    bIsPlayer = IsPlayerControlled();
+    if (bIsPlayer)
+    {
+        ABPlayerController = Cast<AABPlayerController>(GetController());
+        ABCHECK(nullptr != ABPlayerController);
+    }
+    else
+    {
+        ABAIController = Cast<AABAIController>(GetController());
+        ABCHECK(nullptr != ABPlayerController);
+    }
+
+    auto DefaultSetting = GetDefault<UABCharacterSetting>();
+
+    if (bIsPlayer)
+    {
+        AssetIndex = 4;
+    }
+    else
+    {
+        AssetIndex = FMath::RandRange(0, DefaultSetting->CharacterAssets.Num() - 1);
+    }
+
+    CharacterAssetToLoad = DefaultSetting->CharacterAssets[AssetIndex];
+    auto ABGameInstance = Cast<UABGameInstance>(GetGameInstance());
+    ABCHECK(nullptr != ABGameInstance);
+    AssetStreamingHandle = ABGameInstance->StreamableManager.RequestAsyncLoad(CharacterAssetToLoad, FStreamableDelegate::CreateUObject(this, &AABCharacter::OnAssetLoadCompleted));
+    SetCharacterState(ECharacterState::LOADING);
+
+    /*
     if (!IsPlayerControlled())  //만약 AI라면 즉 플레이어 컨트롤러가 아니라면
     {
         auto DafaultSetting = GetDefault<UABCharacterSetting>();  //
@@ -159,7 +197,100 @@ void AABCharacter::BeginPlay()
     if (nullptr != CharacterWidget)
     {
         CharacterWidget->BindCharacterStat(CharacterStat);  //이게 있어야 한다. CharacterStat을 BindCharacterStat에 바인드 해준다. 
+    }    506페이지 작성 중에 교재에 이 라인들이 없어서 주석처리했습니다. */
+}
+
+void AABCharacter::SetCharacterState(ECharacterState NewState)
+{
+    ABCHECK(CurrentState != NewState);
+    CurrentState = NewState;
+
+    switch (CurrentState)
+    {
+    case ECharacterState::LOADING:
+    {
+        if (bIsPlayer)
+        {
+            DisableInput(ABPlayerController);
+
+            auto ABPlayerState = Cast<AABPlayerState>(PlayerState);
+            ABCHECK(nullptr != ABPlayerState);
+            CharacterStat->SetNewLevel(ABPlayerState->GetCharacterLevel());
+        }
+
+        SetActorHiddenInGame(true);
+        HPBarWidget->SetHiddenInGame(true);
+        bCanBeDamaged = false;
+        break;
     }
+    case ECharacterState::READY:
+    {
+        SetActorHiddenInGame(false);
+        HPBarWidget->SetHiddenInGame(false);
+        bCanBeDamaged = true;
+
+        CharacterStat->OnHPIsZero.AddLambda([this]() -> void {
+
+            SetCharacterState(ECharacterState::DEAD);
+
+            });
+
+        auto CharacterWidget = Cast<UABCharacterWidget>(HPBarWidget->GetUserWidgetObject());
+        ABCHECK(nullptr != CharacterWidget);
+        CharacterWidget->BindCharacterStat(CharacterStat);
+
+        if (bIsPlayer)
+        {
+            SetControlMode(EControlMode::DIABLO);
+            GetCharacterMovement()->MaxWalkSpeed = 600.0f;
+            EnableInput(ABPlayerController);
+        }
+        else
+        {
+            SetControlMode(EControlMode::NPC);
+            GetCharacterMovement()->MaxWalkSpeed = 400.0f;
+            ABAIController->RunAI();
+        }
+
+        break;
+    }
+    case ECharacterState::DEAD:
+    {
+        SetActorEnableCollision(false);
+        GetMesh()->SetHiddenInGame(true);
+        HPBarWidget->SetHiddenInGame(true);
+        ABAnim->SetDeadAnim();
+        bCanBeDamaged = false;
+
+        if (bIsPlayer)
+        {
+            DisableInput(ABPlayerController);
+        }
+        else
+        {
+            ABAIController->StopAI();
+        }
+
+        GetWorld()->GetTimerManager().SetTimer(DeadTimerHandle, FTimerDelegate::CreateLambda([this]() -> void {
+
+            if (bIsPlayer)
+            {
+                ABPlayerController->RestartLevel();
+            }
+            else
+            {
+                Destroy();
+            }
+            }), DeadTimer, false);
+
+        break;
+    }
+    }
+}
+
+ECharacterState AABCharacter::GetCharacterState() const
+{
+    return CurrentState;
 }
 
 bool AABCharacter::CanSetWeapon()
@@ -464,8 +595,13 @@ void AABCharacter::OnAssetLoadCompleted()
 {
     USkeletalMesh* AssetLoaded = Cast<USkeletalMesh>(AssetStreamingHandle->GetLoadedAsset());
     AssetStreamingHandle.Reset();
-    if (nullptr != AssetLoaded)  //널포인터가 아니라면, 즉 주소가 없는게 아니라면.
+    ABCHECK(nullptr != AssetLoaded);
+    GetMesh()->SetSkeletalMesh(AssetLoaded);  //SetSkeletalMesh에 AssetLoaded 에셋을 로드해서 캐릭터가 등장할 때마다 메쉬가 달라진다.
+
+    SetCharacterState(ECharacterState::READY);
+
+    /*  if (nullptr != AssetLoaded)  //널포인터가 아니라면, 즉 주소가 없는게 아니라면.
     {
-        GetMesh()->SetSkeletalMesh(AssetLoaded);  //SetSkeletalMesh에 AssetLoaded 에셋을 로드해서 캐릭터가 등장할 때마다 메쉬가 달라진다. 
-    }
+         
+    }  */
 }

@@ -25,6 +25,33 @@ AABAIController::AABAIController()
 	}
 }
 
+void AABAIController::OnPossess(APawn* InPawn)
+{
+	Super::Possess(InPawn);
+}
+
+void AABAIController::RunAI()
+{
+	if (UseBlackboard(BBAsset, Blackboard))
+	{
+		Blackboard->SetValueAsVector(HomePosKey, GetPawn()->GetActorLocation());
+		if (!RunBehaviorTree(BTAsset))
+		{
+			ABLOG(Error, TEXT("AIController couldn't run behavior tree!"));
+		}
+	}
+}
+
+void AABAIController::StopAI()
+{
+	auto BehaviorTreeComponent = Cast<UBehaviorTreeComponent>(BrainComponent);
+	if (nullptr != BehaviorTreeComponent)
+	{
+		BehaviorTreeComponent->StopTree(EBTStopMode::Safe);
+	}
+}
+
+/*
 void AABAIController::OnPossess(APawn* InPawn)  //403페이지에 다라 On 첨가, OnPossess는 폰이 컨트롤러에 빙의할 때 호룿된다. 즉 사용자가 조종을 시작할 때. 
 {
 	Super::OnPossess(InPawn);  //이후 부모의 OnPossess를 불러오고 인자로는 컨트롤러가 빙의한 폰이 들어간다. 
@@ -37,7 +64,7 @@ void AABAIController::OnPossess(APawn* InPawn)  //403페이지에 다라 On 첨가, OnPo
 		}
 	}
 }
-
+  511페이지에 이 라인들이 없어서 주석터리했습니다.  */
 
 	/*  GetWorld()->GetTimerManager().SetTimer(RepeatTimerHandle, this, &AABAIController::OnRepeatTimer, RepeatInterval, true);
 }
