@@ -85,7 +85,8 @@ AABCharacter::AABCharacter()
 
     SetActorHiddenInGame(true);
     HPBarWidget->SetHiddenInGame(true);
-    bCanBeDamaged = false;
+    SetCanBeDamaged(false);
+    //bCanBeDamaged = false;
     DeadTimer = 5.0f;
 }
 
@@ -152,7 +153,7 @@ void AABCharacter::BeginPlay()
     else
     {
         ABAIController = Cast<AABAIController>(GetController());
-        ABCHECK(nullptr != ABPlayerController);
+        ABCHECK(nullptr != ABAIController);
     }
 
     auto DefaultSetting = GetDefault<UABCharacterSetting>();
@@ -213,25 +214,27 @@ void AABCharacter::SetCharacterState(ECharacterState NewState)
         {
             DisableInput(ABPlayerController);
 
-            auto ABPlayerState = Cast<AABPlayerState>(PlayerState);
+            auto ABPlayerState = Cast<AABPlayerState>(GetPlayerState());
             ABCHECK(nullptr != ABPlayerState);
             CharacterStat->SetNewLevel(ABPlayerState->GetCharacterLevel());
         }
 
         SetActorHiddenInGame(true);
         HPBarWidget->SetHiddenInGame(true);
-        bCanBeDamaged = false;
+        SetCanBeDamaged(false);
+        //bCanBeDamaged = false;
         break;
     }
     case ECharacterState::READY:
     {
         SetActorHiddenInGame(false);
         HPBarWidget->SetHiddenInGame(false);
-        bCanBeDamaged = true;
+        SetCanBeDamaged(true);
+        //bCanBeDamaged = true;
 
-        CharacterStat->OnHPIsZero.AddLambda([this]() -> void {
+        CharacterStat->OnHPIsZero.AddLambda([this]() -> void {  //람다함수를 바인딩하고 람다함수 정의부에 236라인이 있다. 
 
-            SetCharacterState(ECharacterState::DEAD);
+            SetCharacterState(ECharacterState::DEAD);  //dead하면 257라인으로 이동
 
             });
 
@@ -257,31 +260,31 @@ void AABCharacter::SetCharacterState(ECharacterState NewState)
     case ECharacterState::DEAD:
     {
         SetActorEnableCollision(false);
-        GetMesh()->SetHiddenInGame(true);
-        HPBarWidget->SetHiddenInGame(true);
-        ABAnim->SetDeadAnim();
-        bCanBeDamaged = false;
+        HPBarWidget->SetHiddenInGame(true);  //죽었으니까  hp바를 숨긴다. . 
+        ABAnim->SetDeadAnim();  //죽는 야ㅐ니메이션 실행시키고
+        SetCanBeDamaged(false);
+        //bCanBeDamaged = false;
 
-        if (bIsPlayer)
+        if (bIsPlayer)  //죽은 게 플레이어인지 검사한다. 플레이어였다면...
         {
             DisableInput(ABPlayerController);
         }
-        else
+        else  //AI가 죽었다면...
         {
             ABAIController->StopAI();
         }
 
         GetWorld()->GetTimerManager().SetTimer(DeadTimerHandle, FTimerDelegate::CreateLambda([this]() -> void {
-
-            if (bIsPlayer)
+            //여기서부터는 죽은 후에 벌어지느 일
+            if (bIsPlayer)  //죽은 후, 즉 5초 후에도 람다 함수 실행
             {
-                ABPlayerController->RestartLevel();
+                ABPlayerController->RestartLevel();  //죽은 게 플레이어였으면 재시작
             }
             else
             {
                 Destroy();
             }
-            }), DeadTimer, false);
+            }), DeadTimer, false);  //죽은 게 AI 였으면 디스트로이. 
 
         break;
     }
@@ -400,8 +403,9 @@ void AABCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 
 void AABCharacter::UpDown(float NewAxisValue)
 {
-    if (IsAttacking==true)
+    if (GetCurrentStateNodeName() == TEXT("") || ABAnim->GetCurrentActiveMontage())  //
     {
+
         return;
     }
 
@@ -418,7 +422,7 @@ void AABCharacter::UpDown(float NewAxisValue)
 
 void AABCharacter::LeftRight(float NewAxisValue)
 {
-    if (IsAttacking == true)
+    if (GetCurrentStateNodeName() == TEXT("") || ABAnim->GetCurrentActiveMontage())  //
     {
         return;
     }

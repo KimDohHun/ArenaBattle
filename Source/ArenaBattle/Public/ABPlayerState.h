@@ -14,7 +14,7 @@ class ARENABATTLE_API AABPlayerState : public APlayerState
 {
 	GENERATED_BODY()
 
-public:
+public:  //스테이트에서 플레이어의 상태 저장
 	AABPlayerState();
 
 	int32 GetGameScore() const;
@@ -24,7 +24,7 @@ public:
 
 protected:
 	UPROPERTY(Transient)
-	int32 GameScore;
+	int32 GameScore;  //스코어와 레벨 저장
 
 	UPROPERTY(Transient)
 	int32 CharacterLevel;

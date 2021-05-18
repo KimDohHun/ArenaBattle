@@ -17,7 +17,7 @@ public:
 	FABCharacterData() : Level(1), MaxHP(100.0f), Attack(10.0f), DropExp(10), NextExp(30) {}
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
-	int32 Level;
+	int32 Level;  //싱글톤 : 게임인스턴스는 레벨이 변해도 사라지지 않지만 캐릭터는 레벨이 변하면 사라진다. 그래서 레벨을 싱글톤에서 관리한다. 레벨이 변해도 사라짖 않게 하려고. 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	float MaxHP;

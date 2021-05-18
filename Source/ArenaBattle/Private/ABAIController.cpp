@@ -27,14 +27,14 @@ AABAIController::AABAIController()
 
 void AABAIController::OnPossess(APawn* InPawn)
 {
-	Super::Possess(InPawn);
+	Super::OnPossess(InPawn);
 }
 
 void AABAIController::RunAI()
 {
-	if (UseBlackboard(BBAsset, Blackboard))
+	if (UseBlackboard(BBAsset, Blackboard)) //BBAsset을 셋하는데 이건 18라인에서 생성한다. Blackboard에 BBAsset을 넣는다. 
 	{
-		Blackboard->SetValueAsVector(HomePosKey, GetPawn()->GetActorLocation());
+		Blackboard->SetValueAsVector(HomePosKey, GetPawn()->GetActorLocation());  //HomePosKey에 액터 위치를 넣느다. 
 		if (!RunBehaviorTree(BTAsset))
 		{
 			ABLOG(Error, TEXT("AIController couldn't run behavior tree!"));
@@ -42,9 +42,9 @@ void AABAIController::RunAI()
 	}
 }
 
-void AABAIController::StopAI()
+void AABAIController::StopAI()  //AI의 비헤비어 트리를 스탑시킨다. 
 {
-	auto BehaviorTreeComponent = Cast<UBehaviorTreeComponent>(BrainComponent);
+	auto BehaviorTreeComponent = Cast<UBehaviorTreeComponent>(BrainComponent);  //다운캐스팅
 	if (nullptr != BehaviorTreeComponent)
 	{
 		BehaviorTreeComponent->StopTree(EBTStopMode::Safe);
