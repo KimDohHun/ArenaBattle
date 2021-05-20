@@ -13,6 +13,7 @@
 #include "ABGameInstance.h"
 #include "ABPlayerController.h"
 #include "ABPlayerState.h"
+#include "ABHUDWidget.h"
 
 // Sets default values
 AABCharacter::AABCharacter()
@@ -121,19 +122,38 @@ void AABCharacter::PostInitializeComponents()
 
 }
 
+int32 AABCharacter::GetExp() const
+{
+    return CharacterStat->GetDropExp();
+}
+
 //370페이지 라인입니다. 원래 357라인에 있던 것을 이 위치로 옮겼습니다. 
 float AABCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {   //여기서부터는 맞은애로 넘어온다. 370라인에서 여기로 넘어옴. 
     float FinalDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-    ABLOG(Warning, TEXT("Actor : %s took Damage : %f"), *GetName(), FinalDamage);
+    
+    CharacterStat->SetDamage(FinalDamage);
+    if (CurrentState == ECharacterState::DEAD)
+    {
+        if (EventInstigator->IsPlayerController())
+        {
+            auto ABPlayerController = Cast<AABPlayerController>(EventInstigator);
+            ABCHECK(nullptr != ABPlayerController, 0.0f);
+            ABPlayerController->NPCKill(this);
+        }
+    }
+    
+    //   ABLOG(Warning, TEXT("Actor : %s took Damage : %f"), *GetName(), FinalDamage);  538페이지 작성 시 이 라인이 없어서 주석 처리했습니다.
 
-    // 임시 테스트용
+
+
+    /*  // 임시 테스트용
     if (!IsPlayerControlled())
     {
         FinalDamage *= 3.0f;
     }
 
-    CharacterStat->SetDamage(FinalDamage);  //테이크데미지
+    CharacterStat->SetDamage(FinalDamage);  //테이크데미지    538페이지 작성 시 이 라인이 없어서 주석 처리했습니다. */
     return FinalDamage;    //이 라인이 원래 여기에 없었는데 370페이지에 적혀 있어서 새로 작성했습니다. 102라인과 겹쳐서 문제가 되지는 않을까요??
 
 }
@@ -213,6 +233,8 @@ void AABCharacter::SetCharacterState(ECharacterState NewState)
         if (bIsPlayer)
         {
             DisableInput(ABPlayerController);
+
+            ABPlayerController->GetHUDWidget()->BindCharacterStat(CharacterStat);
 
             auto ABPlayerState = Cast<AABPlayerState>(GetPlayerState());
             ABCHECK(nullptr != ABPlayerState);

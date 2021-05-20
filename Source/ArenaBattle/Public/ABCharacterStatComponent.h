@@ -27,8 +27,9 @@ public:
 	void SetNewLevel(int32 NewLevel);
 	void SetDamage(float NewDamage);
 	void SetHP(float NewHP);
-	float GetAttack();
-	float GetHPRatio();
+	float GetAttack();  //교재 535페이지에는const가 있어서 추가했더니 컴파일이 안 돼서 삭제했습니다.  
+	float GetHPRatio();  //교재 535페이지에는const가 있어서 추가했더니 컴파일이 안 돼서 삭제했습니다.   
+	int32 GetDropExp() const;
 
 	FOnHPIsZeroDelegate OnHPIsZero;
 	FOnHPChangedDelegate OnHPChanged;

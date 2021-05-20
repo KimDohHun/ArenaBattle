@@ -15,14 +15,26 @@ class ARENABATTLE_API AABPlayerController : public APlayerController
 	GENERATED_BODY()
 
 public:
+	AABPlayerController();
+
 	virtual void PostInitializeComponents() override;
 	virtual void OnPossess(APawn* aPawn) override;
 
+	class UABHUDWidget* GetHUDWidget() const;
+	void NPCKill(class AABCharacter* KilledNPC) const;
+
 protected:
-	//virtual void SetupInoutComponent() override;  이 라인 삭제 후 159페이지 라인 작성?
 	virtual void BeginPlay() override;
+	virtual void SetupInputComponent() override;  //이 라인 삭제 후 159페이지 라인 작성? -> 523페이지 작성할 때 이 라인 주석처리돼 있었음.
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = UI)
+	TSubclassOf<class UABHUDWidget> HUDWidgetClass;
 
 private:
-	void LeftRight(float NewAxisValue);
+	UPROPERTY()
+	class UABHUDWidget* HUDWidget;
+
+	UPROPERTY()
+	class AABPlayerState* ABPlayerState;
 	
 };

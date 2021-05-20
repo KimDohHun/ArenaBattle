@@ -50,6 +50,11 @@ void UABCharacterStatComponent::SetNewLevel(int32 NewLevel)
 	}
 }
 
+int32 UABCharacterStatComponent::GetDropExp() const
+{
+	return CurrentStatData->DropExp;
+}
+
 
 // Called every frame
 /* void UABCharacterStatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)

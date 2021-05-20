@@ -2,6 +2,18 @@
 
 
 #include "ABPlayerController.h"
+#include "ABHUDWidget.h"
+#include "ABPlayerState.h"
+#include "ABCharacter.h"
+
+AABPlayerController::AABPlayerController()
+{
+	static ConstructorHelpers::FClassFinder<UABHUDWidget> UI_HUD_C(TEXT("/Game/Book/UI/UI_HUD.UI_HUD"));
+	if (UI_HUD_C.Succeeded())
+	{
+		HUDWidgetClass = UI_HUD_C.Class;
+	}
+}
 
 void AABPlayerController::PostInitializeComponents()
 {
@@ -32,4 +44,23 @@ void AABPlayerController::BeginPlay()
 
 	FInputModeGameOnly InputMode;
 	SetInputMode(InputMode);
+
+	HUDWidget = CreateWidget<UABHUDWidget>(this, HUDWidgetClass);
+	HUDWidget->AddToViewport();
+
+	ABPlayerState = Cast<AABPlayerState>(PlayerState);
+	//  auto ABPlayerState = Cast<AABPlayerState>(PlayerState);   537페이지 작성 시 이 라인 없어서 주석 처리
+	ABCHECK(nullptr != ABPlayerState);
+	HUDWidget->BindPlayerState(ABPlayerState);
+	ABPlayerState->OnPlayerStateChanged.Broadcast();
+}
+
+void AABPlayerController::NPCKill(AABCharacter* KilledNPC) const
+{
+	ABPlayerState->AddExp(KilledNPC->GetExp());
+}
+
+UABHUDWidget* AABPlayerController::GetHUDWidget() const
+{
+	return HUDWidget;
 }
