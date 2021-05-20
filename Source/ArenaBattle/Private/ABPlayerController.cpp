@@ -8,7 +8,7 @@
 
 AABPlayerController::AABPlayerController()
 {
-	static ConstructorHelpers::FClassFinder<UABHUDWidget> UI_HUD_C(TEXT("/Game/Book/UI/UI_HUD.UI_HUD"));
+	static ConstructorHelpers::FClassFinder<UABHUDWidget> UI_HUD_C(TEXT("/Game/Book/UI/UI_HUD.UI_HUD_C"));
 	if (UI_HUD_C.Succeeded())
 	{
 		HUDWidgetClass = UI_HUD_C.Class;
@@ -27,17 +27,6 @@ void AABPlayerController::OnPossess(APawn* aPawn)
 	Super::OnPossess(aPawn);
 }
 
-/*void AABPlayerController::SetupInputComponent()
-{
-	Super::SetupInputComponent();
-	InputComponent->BindAxis(TEXT("LeftRight"), this, &AABPlayerController::LeftRight);
-}
-
-void AABPlayerController::LeftRight(float NewAxisValue)
-{
-	// Do Nothing!
-}     이 라인들 지우고 159페이지 작성  */
-
 void AABPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
@@ -45,7 +34,7 @@ void AABPlayerController::BeginPlay()
 	FInputModeGameOnly InputMode;
 	SetInputMode(InputMode);
 
-	HUDWidget = CreateWidget<UABHUDWidget>(this, HUDWidgetClass);
+	HUDWidget = CreateWidget<UABHUDWidget>(this, HUDWidgetClass);  //11라인에서 UABHUDWidget를 가져온다. CreateWidget이 없으면 ...
 	HUDWidget->AddToViewport();
 
 	ABPlayerState = Cast<AABPlayerState>(PlayerState);

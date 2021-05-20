@@ -137,9 +137,9 @@ float AABCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
     {
         if (EventInstigator->IsPlayerController())
         {
-            auto ABPlayerController = Cast<AABPlayerController>(EventInstigator);
-            ABCHECK(nullptr != ABPlayerController, 0.0f);
-            ABPlayerController->NPCKill(this);
+            auto PlayerController = Cast<AABPlayerController>(EventInstigator);
+            ABCHECK(nullptr != PlayerController, 0.0f);
+            PlayerController->NPCKill(this);
         }
     }
     
@@ -546,7 +546,7 @@ void AABCharacter::AttackStartComboState()
     CanNextCombo = true;
     IsComboInputOn = false;
     ABCHECK(FMath::IsWithinInclusive<int32>(CurrentCombo, 0, MaxCombo - 1));
-    CurrentCombo = FMath::Clamp<int32>(CurrentCombo + 1, 1, MaxCombo);
+    CurrentCombo = FMath::Clamp<int32>(CurrentCombo + 1, 1, MaxCombo);  // clamp는 최소값보다 작으면 최소갑으로, 최대값보다 크면 최대갑으로 리턴한단 것. 
 }
 
 void AABCharacter::AttackEndComboState()
@@ -622,7 +622,7 @@ void AABCharacter::OnAssetLoadCompleted()
     USkeletalMesh* AssetLoaded = Cast<USkeletalMesh>(AssetStreamingHandle->GetLoadedAsset());
     AssetStreamingHandle.Reset();
     ABCHECK(nullptr != AssetLoaded);
-    GetMesh()->SetSkeletalMesh(AssetLoaded);  //SetSkeletalMesh에 AssetLoaded 에셋을 로드해서 캐릭터가 등장할 때마다 메쉬가 달라진다.
+    GetMesh()->SetSkeletalMesh(AssetLoaded);  //SetSkeletalMesh에 AssetLoaded 에셋을 인자로 넣어서 캐릭터가 등장할 때마다 메쉬가 달라진다.
 
     SetCharacterState(ECharacterState::READY);
 

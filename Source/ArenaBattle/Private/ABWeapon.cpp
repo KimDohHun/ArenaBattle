@@ -13,12 +13,13 @@ AABWeapon::AABWeapon()
 	RootComponent = Weapon;
 
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> SK_WEAPON(TEXT("/Game/InfinityBladeWeapons/Weapons/Blade/Swords/Blade_BlackKnight/SK_Blade_BlackKnight.SK_Blade_BlackKnight"));
+	//static은 닥 한 번만 생성 시에 로드한단 것. 여기서는 전역의 의미가 아니다. 한 번함 로드하면 메모리 효율이 올라간다. 
 	if (SK_WEAPON.Succeeded())
 	{
 		Weapon->SetSkeletalMesh(SK_WEAPON.Object);
 	}
 
-	Weapon->SetCollisionProfileName(TEXT("NoCollision"));
+	Weapon->SetCollisionProfileName(TEXT("NoCollision"));  //충돌을 아무랑도 안 한다는 것. 
 }
 
 // Called when the game starts or when spawned

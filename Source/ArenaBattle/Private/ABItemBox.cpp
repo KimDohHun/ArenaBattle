@@ -43,7 +43,7 @@ AABItemBox::AABItemBox()
 }
 
 // Called when the game starts or when spawned
-void AABItemBox::BeginPlay()
+void AABItemBox::BeginPlay()  //비긴플레이는 레벨이 로드될 때 시작한다. 
 {
 	Super::BeginPlay();
 	

@@ -45,7 +45,7 @@ AABSection::AABSection()
 	for (FName GateSocket : GateSockets)  //범위기반for문으로서 GateSocket에 33 라인의 4개를 하나씩 담는다. 
 	{
 		ABCHECK(Mesh->DoesSocketExist(GateSocket));  //소켓이 존재하는지 ABCHECK로 보기
-		UStaticMeshComponent* NewGate = CreateAbstractDefaultSubobject<UStaticMeshComponent>(*GateSocket.ToString());  
+		UStaticMeshComponent* NewGate = CreateDefaultSubobject<UStaticMeshComponent>(*GateSocket.ToString());  
 		//NewGate에 CreateAbstractDefaultSubobject이거를 이용해서... CreateAbstractDefaultSubobject의 첫 번째 인자는 FName이므로 이름짓기. (12라인에서 MESH라고 이름을 지었으므로 이것은 33라인과 같이 이름 짓기), 이후 뉴게이트로 게이트 생성. 
 		NewGate->SetStaticMesh(SM_GATE.Object);
 		NewGate->SetupAttachment(RootComponent, GateSocket);

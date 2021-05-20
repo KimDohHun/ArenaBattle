@@ -29,7 +29,7 @@ void AABPlayerState::InitPlayerData()  //임의의 값들이 들어간다.
 	Exp = 0;
 }
 
-float AABPlayerState::GetExpRatio() const
+float AABPlayerState::GetExpRatio() const  //const는 함수의 정의부에서 값을 수정할 수 없단 것. 
 {
 	if (CurrentStatData->NextExp <= KINDA_SMALL_NUMBER)
 		return 0.0f;
