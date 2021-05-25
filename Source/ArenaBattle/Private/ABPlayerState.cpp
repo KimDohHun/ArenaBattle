@@ -30,17 +30,17 @@ int32 AABPlayerState::GetCharacterLevel() const
 }
 
 void AABPlayerState::InitPlayerData()  //임의의 값들이 들어간다. 
-{	
-	auto ABSaveGame = Cast<UABSaveGame>(UGameplayStatics::LoadGameFromSlot(SaveSlotName, 0));
+{	//플레이어가 접속할 때 플레이어 정보 초기화
+	auto ABSaveGame = Cast<UABSaveGame>(UGameplayStatics::LoadGameFromSlot(SaveSlotName, 0));  //인자로 슬롯. 
 	if (nullptr == ABSaveGame)
 	{
-		ABSaveGame = GetMutableDefault<UABSaveGame>();
+		ABSaveGame = GetMutableDefault<UABSaveGame>();  //이건 디폴트 오브젝트 가져오기. 
 	}
 
 	SetPlayerName(ABSaveGame->PlayerName);
 	SetCharacterLevel(ABSaveGame->Level);
 	GameScore = 0;
-	GameHighScore = ABSaveGame->HighScore;
+	GameHighScore = ABSaveGame->HighScore;  //오른쪽 값들은 저장되는 값들이고 왼쪽 값은 처음 값.
 	Exp = ABSaveGame->Exp;
 
 	/*SetPlayerName(TEXT("Destiny"));
@@ -49,7 +49,7 @@ void AABPlayerState::InitPlayerData()  //임의의 값들이 들어간다.
 	Exp = 0;  555페이지 주석처리 했습니다. */
 }
 
-void AABPlayerState::AddGameScore()
+void AABPlayerState::AddGameScore()  //
 {
 	GameScore++;
 	if (GameScore >= GameHighScore)

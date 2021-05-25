@@ -21,7 +21,7 @@ void UABHUDWidget::BindPlayerState(AABPlayerState* PlayerState)
 	PlayerState->OnPlayerStateChanged.AddUObject(this, &UABHUDWidget::UpdatePlayerState);
 }
 
-void UABHUDWidget::NativeConstruct()
+void UABHUDWidget::NativeConstruct()  //ABCharacterWidget.h 의 27, 28라인에 있는 대로 선생님이 가르쳐주신 대로 하는 게 더 쉽다. 
 {
 	Super::NativeConstruct();
 	HPBar = Cast<UProgressBar>(GetWidgetFromName(TEXT("pbHP")));

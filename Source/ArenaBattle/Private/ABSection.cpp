@@ -95,7 +95,7 @@ void AABSection::SetState(ESectionState NewState)
 
 		OperateGates(true);  //문을 회전시킨 후
 
-		GetWorld()->GetTimerManager().SetTimer(SpawNPCTimerHandle, FTimerDelegate::CreateUObject(this, &AABSection::OnNPCSpawn), EnemySpawnTime, false);
+		GetWorld()->GetTimerManager().SetTimer(SpawnNPCTimerHandle, FTimerDelegate::CreateUObject(this, &AABSection::OnNPCSpawn), EnemySpawnTime, false);
 		//EnemySpawnTime은 위에서 2초로 정했다. false가 되면 FTimerDelegate로 바인딩 한 함수를 실행한다. 
 		GetWorld()->GetTimerManager().SetTimer(SpawnItemBoxTimerHandle, FTimerDelegate::CreateLambda([this]() -> void {
 			FVector2D RandXY = FMath::RandPointInCircle(600.0f);  //RandPointInCircle 반지름 600범위에서 아무데나 찍는다. 
@@ -198,16 +198,16 @@ void AABSection::OnNPCSpawn()
 	}
 }
 
-void AABSection::OnKeyNPCDestroyed(AActor* DestroyedActor)
+void AABSection::OnKeyNPCDestroyed(AActor* DestroyedActor)  //파괴된 액터가 매개변수로 들어온다. 
 {
 	auto ABCharacter = Cast<AABCharacter>(DestroyedActor);
-	ABCHECK(nullptr != ABCharacter);
+	ABCHECK(nullptr != ABCharacter);  //파괴된 애가 AB캐릭터인지 확인한다. 
 
-	auto ABPlayerController = Cast<AABPlayerController>(ABCharacter->LastHitBy);
-	ABCHECK(nullptr != ABPlayerController);
+	auto ABPlayerController = Cast<AABPlayerController>(ABCharacter->LastHitBy);  //누구에게 맞았는지 확인한다. 
+	ABCHECK(nullptr != ABPlayerController);  //zjsxmfhffj ghkrdls
 
 	auto ABGameMode = Cast<AABGameMode>(GetWorld()->GetAuthGameMode());
-	ABCHECK(nullptr != ABGameMode);
+	ABCHECK(nullptr != ABGameMode);  //
 	ABGameMode->AddScore(ABPlayerController);
 
 	SetState(ESectionState::COMPLETE);

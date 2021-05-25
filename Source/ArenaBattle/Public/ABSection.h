@@ -3,7 +3,7 @@
 #pragma once
 
 #include "ArenaBattle.h"
-#include "AI/Navigation/NavModifierComponent.h"
+//#include "AI/Navigation/NavModifierComponent.h"
 #include "GameFramework/Actor.h"
 #include "ABSection.generated.h"
 
@@ -70,6 +70,6 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Spawn", Meta = (AllowPrivateAccess = true))
 	float ItemBoxSpawnTime;
 
-	FTimerHandle SpawNPCTimerHandle = {};  //타이머핸들
+	FTimerHandle SpawnNPCTimerHandle = {};  //타이머핸들
 	FTimerHandle SpawnItemBoxTimerHandle = {};
 };

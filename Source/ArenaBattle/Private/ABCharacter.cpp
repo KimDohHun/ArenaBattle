@@ -147,13 +147,13 @@ float AABCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 
 
 
-    /*  // 임시 테스트용
+    // 임시 테스트용
     if (!IsPlayerControlled())
     {
         FinalDamage *= 3.0f;
     }
 
-    CharacterStat->SetDamage(FinalDamage);  //테이크데미지    538페이지 작성 시 이 라인이 없어서 주석 처리했습니다. */
+    CharacterStat->SetDamage(FinalDamage);  //테이크데미지    538페이지 작성 시 이 라인이 없어서 주석 처리했습니다. 
     return FinalDamage;    //이 라인이 원래 여기에 없었는데 370페이지에 적혀 있어서 새로 작성했습니다. 102라인과 겹쳐서 문제가 되지는 않을까요??
 
 }
