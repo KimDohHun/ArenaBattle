@@ -1,6 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
+#include "ABGameMode.h"
+#include "ABPlayerController.h"
 #include "ABSection.h"
 #include "ABCharacter.h"
 #include "ABItemBox.h" 
@@ -188,13 +190,25 @@ void AABSection::OnGateTriggerBeginOverlap(UPrimitiveComponent* OverlappedCompon
 
 void AABSection::OnNPCSpawn()
 {
-	GetWorld()->SpawnActor<AABCharacter>(GetActorLocation() + FVector::UpVector * 88.0f, FRotator::ZeroRotator);
+	GetWorld()->GetTimerManager().ClearTimer(SpawnNPCTimerHandle);
+	auto KeyNPC = GetWorld()->SpawnActor<AABCharacter>(GetActorLocation() + FVector::UpVector * 88.0f, FRotator::ZeroRotator);  //544페이지 코드 14-32번에 없던 라인이 생겼고 있던 라인은 교재에 보이지 않습니다. 
+	if (nullptr != KeyNPC)
+	{
+		KeyNPC->OnDestroyed.AddDynamic(this, &AABSection::OnKeyNPCDestroyed);
+	}
 }
 
-// Called every frame
-/*  이 부분에 에러가 나오고 교재에 이 부분이 기입돼 있지 않아서 일단 주석처리했습니다.  void AABSection::Tick(float DeltaTime)
+void AABSection::OnKeyNPCDestroyed(AActor* DestroyedActor)
 {
-	Super::Tick(DeltaTime);
+	auto ABCharacter = Cast<AABCharacter>(DestroyedActor);
+	ABCHECK(nullptr != ABCharacter);
 
-}  */
+	auto ABPlayerController = Cast<AABPlayerController>(ABCharacter->LastHitBy);
+	ABCHECK(nullptr != ABPlayerController);
 
+	auto ABGameMode = Cast<AABGameMode>(GetWorld()->GetAuthGameMode());
+	ABCHECK(nullptr != ABGameMode);
+	ABGameMode->AddScore(ABPlayerController);
+
+	SetState(ESectionState::COMPLETE);
+}

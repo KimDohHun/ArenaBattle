@@ -20,9 +20,12 @@ public:  //스테이트에서 플레이어의 상태 저장
 	AABPlayerState();
 
 	int32 GetGameScore() const;
+	int32 GetGameHighScore() const;
+	FString SaveSlotName;
 	int32 GetCharacterLevel() const;
 	float GetExpRatio() const;
 	bool AddExp(int32 IncomeExp);
+	void AddGameScore();
 
 	void InitPlayerData();
 
@@ -31,6 +34,9 @@ public:  //스테이트에서 플레이어의 상태 저장
 protected:
 	UPROPERTY(Transient)
 	int32 GameScore;  //스코어와 레벨 저장
+
+	UPROPERTY(Transient)
+	int32 GameHighScore;
 
 	UPROPERTY(Transient)
 	int32 CharacterLevel;

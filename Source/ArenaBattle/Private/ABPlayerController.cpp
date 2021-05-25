@@ -44,6 +44,11 @@ void AABPlayerController::BeginPlay()
 	ABPlayerState->OnPlayerStateChanged.Broadcast();
 }
 
+void AABPlayerController::AddGameScore() const
+{
+	ABPlayerState->AddGameScore();
+}
+
 void AABPlayerController::NPCKill(AABCharacter* KilledNPC) const
 {
 	ABPlayerState->AddExp(KilledNPC->GetExp());
