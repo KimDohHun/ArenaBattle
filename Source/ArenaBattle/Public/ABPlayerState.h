@@ -28,6 +28,7 @@ public:  //스테이트에서 플레이어의 상태 저장
 	void AddGameScore();
 
 	void InitPlayerData();
+	void SavePlayerData();
 
 	FOnPlayerStateChangedDelegate OnPlayerStateChanged;  //스탯에 변화가 생겼을 때 변화사항을 호출하기 위한 딜리게이트
 

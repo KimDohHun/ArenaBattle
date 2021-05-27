@@ -15,7 +15,7 @@ bool UBTDecorator_IsInAttackRange::CalculateRawConditionValue(UBehaviorTreeCompo
 {
 	bool bResult = Super::CalculateRawConditionValue(OwnerComp, NodeMemory);  //부모의 CalculateRawConditionValue를 불러오고
 
-	auto ControllingPawn = OwnerComp.GetAIOwner()->GetPawn();
+	auto ControllingPawn = Cast<AABCharacter>(OwnerComp.GetAIOwner()->GetPawn());
 	if (nullptr == ControllingPawn)
 		return false;
 
@@ -23,6 +23,6 @@ bool UBTDecorator_IsInAttackRange::CalculateRawConditionValue(UBehaviorTreeCompo
 	//GetBlackboardComponent에 있는 GetValueAsObject를 가져오고 이것의 매개변수는 TargetKey(키네임)이다. OwnerComp는 14행의 UBehaviorTreeComponent에서 가져온다. 
 	if (nullptr == Target)  //타깃이 널포인터면 false 반환
 		return false;
-	bResult = (Target->GetDistanceTo(ControllingPawn) <= 200.0f);  //에코레이터는 if문과 비슷하다. 
+	bResult = (Target->GetDistanceTo(ControllingPawn) <= ControllingPawn->GetFinalAttackRange());  //에코레이터는 if문과 비슷하다. 
 	return bResult;
 }

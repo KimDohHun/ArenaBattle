@@ -42,11 +42,28 @@ void AABPlayerState::InitPlayerData()  //임의의 값들이 들어간다.
 	GameScore = 0;
 	GameHighScore = ABSaveGame->HighScore;  //오른쪽 값들은 저장되는 값들이고 왼쪽 값은 처음 값.
 	Exp = ABSaveGame->Exp;
+	SavePlayerData();
 
 	/*SetPlayerName(TEXT("Destiny"));
 	SetCharacterLevel (5);
 	GameScore = 0;
 	Exp = 0;  555페이지 주석처리 했습니다. */
+}
+
+void AABPlayerState::SavePlayerData()
+{
+	UABSaveGame* NewPlayerData = NewObject<UABSaveGame>();
+	NewPlayerData->PlayerName = GetPlayerName();
+	NewPlayerData->Level = CharacterLevel;
+	NewPlayerData->Exp = Exp;
+	NewPlayerData->HighScore = GameHighScore;
+
+	if (!UGameplayStatics::SaveGameToSlot(NewPlayerData, SaveSlotName, 0))
+	{
+		ABLOG(Error, TEXT("SaveGame Error!"));
+	}
+
+
 }
 
 void AABPlayerState::AddGameScore()  //
@@ -57,6 +74,7 @@ void AABPlayerState::AddGameScore()  //
 		GameHighScore = GameScore;
 	}
 	OnPlayerStateChanged.Broadcast();
+	SavePlayerData();
 }
 
 float AABPlayerState::GetExpRatio() const  //const는 함수의 정의부에서 값을 수정할 수 없단 것. 
@@ -84,6 +102,7 @@ bool AABPlayerState::AddExp(int32 IncomeExp)
 	}
 
 	OnPlayerStateChanged.Broadcast();
+	SavePlayerData();
 	return DidLevelUp;
 }
 
